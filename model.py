@@ -12,7 +12,6 @@ class EDSR_class(tf.keras.Model):
         self.channels = channels
         self.input_shape = input_shape
 
-
         # define inputs and outputs for keras model using functional API
         inputs = tf.keras.Input(shape=self.input_shape)
         x = tf.keras.layers.Conv2D(64, 5, strides=(1, 1), padding="same", activation="relu", kernel_initializer="Orthogonal", input_shape=self.input_shape)(inputs)
@@ -23,7 +22,6 @@ class EDSR_class(tf.keras.Model):
 
         # initialize model
         self.model = tf.keras.Model(inputs=inputs, outputs=outputs)
-
 
     def train(self, training_images, training_labels, loss_function, optimizer, number_of_batches, number_of_epochs):
         # compile model
