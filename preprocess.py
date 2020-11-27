@@ -36,6 +36,21 @@ def get_normalized_data(image_path, batch_size, dimension):
 
     return train_ds, valid_ds
 
-def scaling(input_image):
+
+def normalize(input_image):
     input_image = input_image / 255.0
     return input_image
+
+
+# Use TF Ops to process.
+def process_input(img, img_sz):
+    img = tf.image.rgb_to_yuv(img)
+    last_dimension_axis = len(img.shape) - 1
+    y, u, v = tf.split(img, 3, axis=last_dimension_axis)
+    return tf.image.resize(y, [img_sz, img_sz], method="area")
+
+
+def process_target(img):
+    img = tf.image.rgb_to_yuv(img)
+    y, u, v = tf.split(img, 3, axis=len(img.shape) - 1)
+    return y
