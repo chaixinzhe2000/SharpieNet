@@ -2,7 +2,8 @@ import tensorflow as tf
 
 # MeanShift layer for our model
 class MeanShift(tf.keras.layers):
-
+    def __init__(self):
+        pass
 
 # ResBlock for our model:
 # no batch norm
