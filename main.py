@@ -12,8 +12,8 @@ import preprocess
 
 # hyperparameters
 batch_size = 8
-original_size = 500
-upscale_factor = 5
+original_size = 600
+upscale_factor = 3
 input_size = original_size // upscale_factor
 
 # joining relative path to form a full path

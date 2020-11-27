@@ -1,5 +1,9 @@
 import tensorflow as tf
 
+# MeanShift layer for our model
+class MeanShift(tf.keras.layers):
+
+
 # ResBlock for our model:
 # no batch norm
 # no activation functions after each conv layer
@@ -69,6 +73,8 @@ class EDSR_super:
 
         # model
         inputs = tf.keras.Input(shape=self.input_shape)
+        # subtract mean (mean shift)
+
         # head
         x = tf.keras.layers.Conv2D(self.number_of_features, self.kernel_size, strides=(1, 1),
                                    padding=self.kernel_size // 2,
@@ -81,13 +87,16 @@ class EDSR_super:
         x = Upsampler(model=self, number_of_features=self.number_of_features).call(x)
         x = tf.keras.layers.Conv2D(self.final_output_channels, self.kernel_size, strides=(1, 1),
                                    padding="same", kernel_initializer="Orthogonal")(x)
+        # add mean (mean shift)
 
+        # initialize model
         self.EDSR_model = tf.keras.Model(inputs, x)
         self.EDSR_model.summary()
 
-    def train(self):
-        pass
+    def train(self, training_data, epochs, loss_fxn, optimizer, validation_data=None, verbose=2):
+        self.EDSR_model.compile(optimizer=optimizer, loss=loss_fxn)
+        history = self.EDSR_model.fit(training_data, epochs=epochs, validation_data=validation_data, verbose=verbose)
+        return history
 
     def test(self):
         pass
-
