@@ -1,3 +1,4 @@
+import PIL
 import tensorflow as tf
 from tensorflow.python.keras.preprocessing.image_dataset import image_dataset_from_directory
 
@@ -36,6 +37,7 @@ def process_input(img, img_sz):
     img = tf.image.rgb_to_yuv(img)
     last_dimension_axis = len(img.shape) - 1
     y, u, v = tf.split(img, 3, axis=last_dimension_axis)
+    # TODO: check method="area"? maybe bilinear instead?
     return tf.image.resize(y, [img_sz, img_sz], method="area")
 
 
@@ -43,3 +45,6 @@ def process_target(img):
     img = tf.image.rgb_to_yuv(img)
     y, u, v = tf.split(img, 3, axis=len(img.shape) - 1)
     return y
+
+def resize_image(image, resulting_size):
+    return image.resize((resulting_size, resulting_size), PIL.Image.BICUBIC)

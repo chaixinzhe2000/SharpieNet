@@ -59,21 +59,25 @@ def main():
     list_of_test_img_paths = []
     for file_name in os.listdir(test_path):
         if file_name.endswith(".jpg"):
-            list_of_test_img_paths.append(os.path.join(test_path, file_name))
+            list_of_test_img_paths.append(file_name)
 
-    for test_image_path in list_of_test_img_paths:
+    for file_name in list_of_test_img_paths:
         # load and preprocess test image
-        test_image_path = os.path.join(dirname, 'test_image.jpg')
+        test_image_path = os.path.join(test_path, file_name)
         HR_test_image = tf.keras.preprocessing.image.load_img(test_image_path)
-        y, Cb, Cr, = postprocess.rgb_to_yuv_normalized(HR_test_image)
-        input = np.expand_dims(y, axis=0)
+        LR_test_image = preprocess.resize_image(HR_test_image, LR_size)
+        # TODO: upscale_image below
+        input_y, input_Cb, input_Cr, = postprocess.rgb_to_yuv_normalized(HR_test_image)
+        input = np.expand_dims(input_y, axis=0)
         # call model.predict and process yuv image to rgb
         yuv_predicted_image = model.predict(input)
-        rgb_predicted_image = postprocess.yuv_to_rgb(yuv_predicted_image, Cb, Cr)
-        # output low res and predicted image files
-        #
-
-        LR_image, HR_image = postprocess.resize_images(LR_test_image, HR_test_image)
+        rgb_predicted_image = postprocess.yuv_to_rgb(yuv_predicted_image)
+        # TODO: instead of using matplotlib, just output a png or jpeg from rgb_predicted_image
+        # TODO: for now, we use matplotlib to see if ours works.
+        postprocess.show_result(rgb_predicted_image, "predicted: ", str(file_name))
+        postprocess.show_result(HR_test_image, "HR: ", str(file_name))
+        postprocess.show_result(LR_test_image, "LR: ", str(file_name))
+ 
 
 if __name__ == "__main__":
     main()
