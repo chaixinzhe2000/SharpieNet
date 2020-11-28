@@ -61,8 +61,10 @@ class Upsampler(tf.keras.layers.Layer):
 class EDSR_super:
     def __init__(self, image_size):
         # from EDSR (torch)
-        self.number_of_resblocks = 32
-        self.number_of_features = 256
+        # self.number_of_resblocks = 32
+        # self.number_of_features = 256
+        self.number_of_resblocks = 3
+        self.number_of_features = 9
         self.kernel_size = 3
         self.res_scaling = 0.1
         self.scaling_factor = 3

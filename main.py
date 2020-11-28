@@ -15,7 +15,7 @@ def main():
 
     # joining relative path to form a full path
     dirname = os.path.dirname(__file__)
-    image_path = os.path.join(dirname, "BSDS500/data/images")
+    image_path = os.path.join(dirname, "BSDS500/fake")
 
     train_data, test_data = \
         preprocess.get_normalized_data(image_path, batch_size, original_size)
@@ -38,7 +38,7 @@ def main():
     # prefetch is for computation optimization
     test_data = test_data.prefetch(buffer_size=32)
 
-    print(train_data)
+    print("PREPROCESSING IS DONE")
     # initializing the model
     model = model_subclassing.EDSR_super(input_size)
     model.train(train_data, 200, loss_fn, optimizer, validation_data=test_data, verbose=2)
