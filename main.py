@@ -1,7 +1,9 @@
 import os
 import preprocess
+import postprocess
 import model_subclassing
 import tensorflow as tf
+import numpy as np
 
 
 def main():
@@ -54,7 +56,10 @@ def main():
     # TODO: call model.predict
     # TODO: post process prediction back into rgb and output image files
 
-
+    postprocess.y_to_rgb_normalized(model, test_data)
+    # call them in main
+    input = np.expand_dims(y, axis=0)
+    out = model.predict(input)
 
 
 if __name__ == "__main__":
