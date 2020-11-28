@@ -15,7 +15,7 @@ def main():
 
     # joining relative path to form a full path
     dirname = os.path.dirname(__file__)
-    image_path = os.path.join(dirname, "BSDS500/fake")
+    image_path = os.path.join(dirname, "BSDS500/data/images")
 
     train_data, test_data = \
         preprocess.get_normalized_data(image_path, batch_size, original_size)
