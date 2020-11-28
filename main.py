@@ -11,6 +11,8 @@ def main():
     batch_size = 8
     original_size = 300
     upscale_factor = 3
+    epochs_for_l1 = 1
+    epochs_for_perceptual = 1
     input_size = original_size // upscale_factor
     LR_size = input_size
     HR_size = original_size
@@ -46,7 +48,7 @@ def main():
     model = model_subclassing.EDSR_super(input_size)
     # train the model using l1 loss
     weights_file = os.path.join(dirname, 'l1_training_weights.h5')
-    model.train_l1(train_data, 200, validation_data=validation_data, verbose=2)
+    model.train_l1(train_data, epochs_for_l1, validation_data=validation_data, verbose=2)
     model.save_weights(weights_file)
     # train the model using perceptual loss
     # TODO: implement perceptual loss
@@ -77,7 +79,7 @@ def main():
         postprocess.show_result(rgb_predicted_image, "predicted: ", str(file_name))
         postprocess.show_result(HR_test_image, "HR: ", str(file_name))
         postprocess.show_result(LR_test_image, "LR: ", str(file_name))
- 
+
 
 if __name__ == "__main__":
     main()

@@ -100,13 +100,16 @@ class EDSR_super:
         self.EDSR_model = tf.keras.Model(inputs, x)
         self.EDSR_model.summary()
 
-    def train(self, training_data, epochs, validation_data, verbose=2):
+    def train_l1(self, training_data, epochs, validation_data, verbose=2):
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=PiecewiseConstantDecay(boundaries=[200000], values=[1e-4, 5e-5]))
         self.loss_fxn = tf.keras.losses.MeanSquaredError()
         self.EDSR_model.compile(optimizer=self.optimizer, loss=self.loss_fxn)
         history = self.EDSR_model.fit(training_data, epochs=epochs, validation_data=validation_data, verbose=verbose)
 
         print('FINISHED TRAINING')
+
+    def train_perceptual(self):
+        pass
 
     def test(self):
         pass
