@@ -1,7 +1,9 @@
 import PIL
 import tensorflow as tf
 import numpy as np
-import matplotlib
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 import mpl_toolkits
 
 # takes images of y (ranging from 0-1 values)
@@ -17,7 +19,9 @@ def rgb_to_yuv_normalized(image_data):
 
 def yuv_to_rgb(predicted_img, cb, cr):
     img_y = predicted_img[0] * 255.0
+    print(tf.shape(img_y))
     img_y = img_y.clip(0, 255)
+    print(tf.shape(img_y))
     img_y = img_y.reshape((np.shape(img_y)[0], np.shape(img_y)[1]))
     img_y = PIL.Image.fromarray(np.uint8(img_y), mode="L")
     img_cb = cb.resize(img_y.size, PIL.Image.BICUBIC)
@@ -25,17 +29,19 @@ def yuv_to_rgb(predicted_img, cb, cr):
     rgb_predicted_image = PIL.Image.merge("YCbCr", (img_y, img_cb, img_cr)).convert("RGB")
     return rgb_predicted_image
 
-def show_result(image, prefix, title):
-    normalized_image_array = tf.keras.preprocessing.image.image_to_array(image).astype("float32")/255.0
+def show_result(img, prefix, file_name):
+    """Plot the result with zoom-in area."""
+    img_array = img_to_array(img)
+    img_array = img_array.astype("float32") / 255.0
 
     # Create a new figure with a default 111 subplot.
-    fig, ax = matplotlib.pyplot.subplots()
-    im = ax.imshow(normalized_image_array[::-1], origin="lower")
+    fig, ax = plt.subplots()
+    im = ax.imshow(img_array[::-1], origin="lower")
 
-    matplotlib.pyplot.title(title)
+    plt.title(prefix+"-"+file_name)
     # zoom-factor: 2.0, location: upper-left
-    axins = mpl_toolkits.axes_grid1.inset_locator(ax, 2, loc=2)
-    axins.imshow(normalized_image_array[::-1], origin="lower")
+    axins = zoomed_inset_axes(ax, 2, loc=2)
+    axins.imshow(img_array[::-1], origin="lower")
 
     # Specify the limits.
     x1, x2, y1, y2 = 200, 300, 100, 200
@@ -44,10 +50,10 @@ def show_result(image, prefix, title):
     # Apply the y-limits.
     axins.set_ylim(y1, y2)
 
-    matplotlib.pyplot.yticks(visible=False)
-    matplotlib.pyplot.xticks(visible=False)
+    plt.yticks(visible=False)
+    plt.xticks(visible=False)
 
     # Make the line.
-    mpl_toolkits.axes_grid1.inset_locator(ax, axins, loc1=1, loc2=3, fc="none", ec="blue")
-    matplotlib.pyplot.savefig(str(prefix) + "-" + title + ".png")
-    matplotlib.pyplot.show()
+    mark_inset(ax, axins, loc1=1, loc2=3, fc="none", ec="blue")
+    plt.savefig(prefix+"-"+file_name)
+    plt.show()

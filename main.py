@@ -19,7 +19,7 @@ def main():
 
     # joining relative path to form a full path
     dirname = os.path.dirname(__file__)
-    image_path = os.path.join(dirname, "BSDS500/data/images")
+    image_path = os.path.join(dirname, "BSDS500/data/small_training_set")
 
     train_data, validation_data = \
         preprocess.get_normalized_data(image_path, batch_size, original_size)
@@ -49,7 +49,7 @@ def main():
     # train the model using l1 loss
     weights_file = os.path.join(dirname, 'l1_training_weights.h5')
     model.train_l1(train_data, epochs_for_l1, validation_data=validation_data, verbose=2)
-    model.save_weights(weights_file)
+    # model.save_weights(weights_file)
     # train the model using perceptual loss
     # TODO: implement perceptual loss
 
@@ -73,12 +73,13 @@ def main():
         input = np.expand_dims(input_y, axis=0)
         # call model.predict and process yuv image to rgb
         yuv_predicted_image = model.predict(input)
-        rgb_predicted_image = postprocess.yuv_to_rgb(yuv_predicted_image)
+        print(tf.shape(yuv_predicted_image))
+        rgb_predicted_image = postprocess.yuv_to_rgb(yuv_predicted_image, input_Cb, input_Cr)
         # TODO: instead of using matplotlib, just output a png or jpeg from rgb_predicted_image
         # TODO: for now, we use matplotlib to see if ours works.
-        postprocess.show_result(rgb_predicted_image, "predicted: ", str(file_name))
-        postprocess.show_result(HR_test_image, "HR: ", str(file_name))
-        postprocess.show_result(LR_test_image, "LR: ", str(file_name))
+        postprocess.show_result(rgb_predicted_image, "predicted", str("file_name.png"))
+        postprocess.show_result(HR_test_image, "HR", str("file_name.png"))
+        postprocess.show_result(LR_test_image, "LR", str("file_name.png"))
 
 
 if __name__ == "__main__":

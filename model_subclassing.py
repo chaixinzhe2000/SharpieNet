@@ -66,12 +66,12 @@ class EDSR_super:
         # from EDSR (torch)
         # self.number_of_resblocks = 32
         # self.number_of_features = 256
-        self.number_of_resblocks = 8
+        self.number_of_resblocks = 16
         self.number_of_features = 64
         self.kernel_size = 3
         self.res_scaling = 0.1
         self.scaling_factor = 3
-        self.final_output_channels = 3
+        self.final_output_channels = 1
 
         # from keras tutorial
         # self.upscale_factor = upscale_factor
