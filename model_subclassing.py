@@ -105,3 +105,6 @@ class EDSR_super:
 
     def test(self):
         pass
+
+    def predict(self, test_data):
+        return self.EDSR_model.predict(test_data)
