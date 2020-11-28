@@ -1,5 +1,7 @@
 import os
 import preprocess
+import model_subclassing
+import tensorflow as tf
 
 
 def main():
@@ -8,6 +10,8 @@ def main():
     original_size = 300
     upscale_factor = 3
     input_size = original_size // upscale_factor
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+    loss_fn = tf.keras.losses.MeanSquaredError()
 
     # joining relative path to form a full path
     dirname = os.path.dirname(__file__)
@@ -34,7 +38,10 @@ def main():
     # prefetch is for computation optimization
     test_data = test_data.prefetch(buffer_size=32)
 
+    print(train_data)
+    # initializing the model
+    model = model_subclassing.EDSR_super(input_size)
+    model.train(train_data, 200, loss_fn, optimizer, validation_data=test_data, verbose=2)
 
 if __name__ == "__main__":
-    # execute only if run as a script
     main()

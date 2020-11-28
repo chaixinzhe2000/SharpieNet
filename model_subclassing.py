@@ -1,23 +1,24 @@
 import tensorflow as tf
 
-# MeanShift layer for our model
-class MeanShift(tf.keras.layers):
-    def __init__(self):
-        pass
+
+# # MeanShift layer for our model
+# class MeanShift(tf.keras.layers):
+#     def __init__(self):
+#         pass
 
 # ResBlock for our model:
 # no batch norm
 # no activation functions after each conv layer
 # no res scaling factor
-class ResBlock(tf.keras.layers):
+class ResBlock(tf.keras.layers.Layer):
     def __init__(self, model, kernel_size, filters):
         super(ResBlock, self).__init__()
         self.conv1 = tf.keras.layers.Conv2D(filters, kernel_size, strides=(1, 1),
-                                            padding="same",
+                                            padding="SAME",
                                             kernel_initializer="Orthogonal")
-        self.activation_fxn = tf.keras.activations.relu()
+        self.activation_fxn = tf.keras.activations.relu
         self.conv2 = tf.keras.layers.Conv2D(filters, kernel_size, strides=(1, 1),
-                                            padding="same",
+                                            padding="SAME",
                                             kernel_initializer="Orthogonal")
 
         # self.res_factor = res_factor
@@ -34,7 +35,7 @@ class ResBlock(tf.keras.layers):
 # Upsampler for our model
 # no batch norm
 # no activation function
-class Upsampler(tf.keras.layers):
+class Upsampler(tf.keras.layers.Layer):
     def __init__(self, model, number_of_features):
         super(Upsampler, self).__init__()
         # ONLY WORKS FOR model.scaling_factor == 3 and MAYBE model.kernel_size == 3
@@ -42,7 +43,7 @@ class Upsampler(tf.keras.layers):
         if model.scaling_factor == 3:
             self.conv1 = tf.keras.layers.Conv2D(number_of_features * (model.scaling_factor ** 2),
                                                 model.kernel_size, strides=(1, 1),
-                                                padding="same",
+                                                padding="SAME",
                                                 kernel_initializer="Orthogonal")
             # TODO: CAN I DEFINE A FUNCTION LIKE THIS?
             self.pixel_shuffle = tf.nn.depth_to_space
@@ -70,7 +71,7 @@ class EDSR_super:
         # from keras tutorial
         # self.upscale_factor = upscale_factor
         # self.channels = channels
-        self.input_shape = (image_size, image_size, 3)
+        self.input_shape = (None, None, 1)
 
         # model
         inputs = tf.keras.Input(shape=self.input_shape)
@@ -78,7 +79,7 @@ class EDSR_super:
         # TODO: not implemented meanshift yet
         # head
         x = tf.keras.layers.Conv2D(self.number_of_features, self.kernel_size, strides=(1, 1),
-                                   padding=self.kernel_size // 2,
+                                   padding="SAME",
                                    kernel_initializer="Orthogonal", input_shape=self.input_shape)(inputs)
         # body
         # TODO: Not sure if we can for loop like this
@@ -87,7 +88,7 @@ class EDSR_super:
         # tail
         x = Upsampler(model=self, number_of_features=self.number_of_features).call(x)
         x = tf.keras.layers.Conv2D(self.final_output_channels, self.kernel_size, strides=(1, 1),
-                                   padding="same", kernel_initializer="Orthogonal")(x)
+                                   padding="SAME", kernel_initializer="Orthogonal")(x)
         # add mean (mean shift)
         # TODO: not implemented meanshift yet
         # initialize model
@@ -97,6 +98,7 @@ class EDSR_super:
     def train(self, training_data, epochs, loss_fxn, optimizer, validation_data=None, verbose=2):
         self.EDSR_model.compile(optimizer=optimizer, loss=loss_fxn)
         history = self.EDSR_model.fit(training_data, epochs=epochs, validation_data=validation_data, verbose=verbose)
+        print('FINISHED TRAINING')
         return history
 
     def test(self):
