@@ -40,9 +40,14 @@ def main():
 
     print("PREPROCESSING IS DONE")
 
-    # initialize and train the model
+    # initialize the model
     model = model_subclassing.EDSR_super(input_size)
-    model.train(train_data, 200, loss_fn, optimizer, validation_data=test_data, verbose=2)
+    # train the model using l1 loss
+    weights_file = os.path.join(dirname, 'l1_training_weights.h5')
+    model.train_l1(train_data, 200, validation_data=test_data, verbose=2)
+    model.save_weights(weights_file)
+    # train the model using perceptual loss
+
 
     # test the model and output results
     # TODO: load and preprocess test_data

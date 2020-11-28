@@ -10,6 +10,9 @@ import tensorflow as tf
 # no batch norm
 # no activation functions after each conv layer
 # no res scaling factor
+from tensorflow.python.keras.optimizer_v2.learning_rate_schedule import PiecewiseConstantDecay
+
+
 class ResBlock(tf.keras.layers.Layer):
     def __init__(self, model, kernel_size, filters):
         super(ResBlock, self).__init__()
@@ -97,13 +100,16 @@ class EDSR_super:
         self.EDSR_model = tf.keras.Model(inputs, x)
         self.EDSR_model.summary()
 
-    def train(self, training_data, epochs, loss_fxn, optimizer, validation_data=None, verbose=2):
-        self.EDSR_model.compile(optimizer=optimizer, loss=loss_fxn)
+    def train(self, training_data, epochs, validation_data=None, verbose=2):
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=PiecewiseConstantDecay(boundaries=[200000], values=[1e-4, 5e-5]))
+
+        self.EDSR_model.compile(optimizer=self.optimizer, loss=loss_fxn)
         history = self.EDSR_model.fit(training_data, epochs=epochs, validation_data=validation_data, verbose=verbose)
+
         print('FINISHED TRAINING')
-        return history
 
     def test(self):
+
         pass
 
     def predict(self, test_data):
