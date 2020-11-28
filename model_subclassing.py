@@ -58,7 +58,7 @@ class Upsampler(tf.keras.layers):
 
 # EDSR super class
 class EDSR_super:
-    def __init__(self, upscale_factor, channels, input_shape):
+    def __init__(self, image_size):
         # from EDSR (torch)
         self.number_of_resblocks = 32
         self.number_of_features = 256
@@ -70,12 +70,12 @@ class EDSR_super:
         # from keras tutorial
         # self.upscale_factor = upscale_factor
         # self.channels = channels
-        self.input_shape = input_shape
+        self.input_shape = (image_size, image_size, 3)
 
         # model
         inputs = tf.keras.Input(shape=self.input_shape)
         # subtract mean (mean shift)
-
+        # TODO: not implemented meanshift yet
         # head
         x = tf.keras.layers.Conv2D(self.number_of_features, self.kernel_size, strides=(1, 1),
                                    padding=self.kernel_size // 2,
@@ -89,7 +89,7 @@ class EDSR_super:
         x = tf.keras.layers.Conv2D(self.final_output_channels, self.kernel_size, strides=(1, 1),
                                    padding="same", kernel_initializer="Orthogonal")(x)
         # add mean (mean shift)
-
+        # TODO: not implemented meanshift yet
         # initialize model
         self.EDSR_model = tf.keras.Model(inputs, x)
         self.EDSR_model.summary()
