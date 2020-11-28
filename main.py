@@ -39,9 +39,18 @@ def main():
     test_data = test_data.prefetch(buffer_size=32)
 
     print("PREPROCESSING IS DONE")
-    # initializing the model
+
+    # initialize and train the model
     model = model_subclassing.EDSR_super(input_size)
     model.train(train_data, 200, loss_fn, optimizer, validation_data=test_data, verbose=2)
+
+    # test the model and output results
+    # TODO: load and preprocess test_data
+    # TODO: call model.predict
+    # TODO: post process prediction back into rgb and output image files
+
+
+
 
 if __name__ == "__main__":
     main()
