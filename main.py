@@ -12,19 +12,19 @@ def main():
     original_size = 300
     upscale_factor = 3
     input_size = original_size // upscale_factor
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
-    loss_fn = tf.keras.losses.MeanSquaredError()
+    LR_size = input_size
+    HR_size = original_size
 
     # joining relative path to form a full path
     dirname = os.path.dirname(__file__)
     image_path = os.path.join(dirname, "BSDS500/data/images")
 
-    train_data, test_data = \
+    train_data, validation_data = \
         preprocess.get_normalized_data(image_path, batch_size, original_size)
 
     # Scale from (0, 255) to (0, 1)
     train_data = train_data.map(preprocess.normalize)
-    test_data = test_data.map(preprocess.normalize)
+    validation_data = validation_data.map(preprocess.normalize)
 
     train_data = train_data.map(
         lambda x: (preprocess.process_input(x, input_size), preprocess.process_target(x))
@@ -33,12 +33,12 @@ def main():
     # prefetch is for computation optimization
     train_data = train_data.prefetch(buffer_size=32)
 
-    test_data = test_data.map(
+    validation_data = validation_data.map(
         lambda x: (preprocess.process_input(x, input_size), preprocess.process_target(x))
     )
 
     # prefetch is for computation optimization
-    test_data = test_data.prefetch(buffer_size=32)
+    validation_data = validation_data.prefetch(buffer_size=32)
 
     print("PREPROCESSING IS DONE")
 
@@ -46,21 +46,34 @@ def main():
     model = model_subclassing.EDSR_super(input_size)
     # train the model using l1 loss
     weights_file = os.path.join(dirname, 'l1_training_weights.h5')
-    model.train_l1(train_data, 200, validation_data=test_data, verbose=2)
+    model.train_l1(train_data, 200, validation_data=validation_data, verbose=2)
     model.save_weights(weights_file)
     # train the model using perceptual loss
+    # TODO: implement perceptual loss
 
 
     # test the model and output results
-    # TODO: load and preprocess test_data
-    # TODO: call model.predict
-    # TODO: post process prediction back into rgb and output image files
+    # set up the directory from where we get test images
+    test_path = os.path.join(dirname, "BSDS500/data/test")
+    # make a list of test image paths
+    list_of_test_img_paths = []
+    for file_name in os.listdir(test_path):
+        if file_name.endswith(".jpg"):
+            list_of_test_img_paths.append(os.path.join(test_path, file_name))
 
-    postprocess.y_to_rgb_normalized(model, test_data)
-    # call them in main
-    input = np.expand_dims(y, axis=0)
-    out = model.predict(input)
+    for test_image_path in list_of_test_img_paths:
+        # load and preprocess test image
+        test_image_path = os.path.join(dirname, 'test_image.jpg')
+        HR_test_image = tf.keras.preprocessing.image.load_img(test_image_path)
+        y, Cb, Cr, = postprocess.rgb_to_yuv_normalized(HR_test_image)
+        input = np.expand_dims(y, axis=0)
+        # call model.predict and process yuv image to rgb
+        yuv_predicted_image = model.predict(input)
+        rgb_predicted_image = postprocess.yuv_to_rgb(yuv_predicted_image, Cb, Cr)
+        # output low res and predicted image files
+        #
 
+        LR_image, HR_image = postprocess.resize_images(LR_test_image, HR_test_image)
 
 if __name__ == "__main__":
     main()
