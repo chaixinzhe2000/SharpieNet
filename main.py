@@ -46,13 +46,15 @@ def main():
 
     # initialize the model
     model = model_subclassing.EDSR_super(input_size)
+    '''
     # train the model using l1 loss
     weights_file = os.path.join(dirname, 'l1_training_weights.h5')
     model.train_l1(train_data, epochs_for_l1, validation_data=validation_data, verbose=2)
     # model.save_weights(weights_file)
+    '''
     # train the model using perceptual loss
     # TODO: implement perceptual loss
-
+    model.train_perceptual(train_data, epochs_for_perceptual, validation_data,verbose=2)
 
     # test the model and output results
     # set up the directory from where we get test images
@@ -72,7 +74,11 @@ def main():
         input_y, input_Cb, input_Cr, = postprocess.rgb_to_yuv_normalized(HR_test_image)
         input = np.expand_dims(input_y, axis=0)
         # call model.predict and process yuv image to rgb
-        yuv_predicted_image = model.predict(input)
+        '''
+        yuv_predicted_image = model.predict_l1(input)
+        '''
+        yuv_predicted_image = model.predict_perceptual(input)
+
         rgb_predicted_image = postprocess.yuv_to_rgb(yuv_predicted_image, input_Cb, input_Cr)
         # TODO: instead of using matplotlib, just output a png or jpeg from rgb_predicted_image
         # TODO: for now, we use matplotlib to see if ours works.
@@ -81,7 +87,7 @@ def main():
         postprocess.save_result(HR_test_image, "HR", str(file_name))
         LR_test_image_for_plot = preprocess.resize_image(HR_test_image, HR_size)
         postprocess.save_result(LR_test_image_for_plot, "LR", str(file_name))
-        # TODO: SAVE THESE IMAGES
+
 
 
 if __name__ == "__main__":

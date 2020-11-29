@@ -97,22 +97,49 @@ class EDSR_super:
         # add mean (mean shift)
         # TODO: not implemented meanshift yet
         # initialize model
-        self.EDSR_model = tf.keras.Model(inputs, x)
-        self.EDSR_model.summary()
+        self.EDSR_model_l1 = tf.keras.Model(inputs, x)
+        self.EDSR_model_l1.summary()
+
+        # set up ESDR model using vgg16 perceptual loss
+        self.perceptual_loss_model = tf.keras.applications.VGG16(include_top=False, weights='imagenet', input_tensor=self.ESDR_model_l1.output,
+                                                                 input_shape=(tf.shape(x)[0], tf.shape(x)[1], self.final_output_channels))
+        selected_layers = [1, 3, 6, 11, 13, 17]
+        selected_outputs = []
+        for layer_index in selected_layers:
+            selected_outputs.append(self.perceptual_loss_model[layer_index].ouput)
+        self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.inputs, selected_outputs)
+        self.perceptual_loss_model.trainable = False
+        loss_model_outputs = self.perceptual_loss_model(self.EDSR_model_l1.output)
+        # initialize fully connected model
+        self.EDSR_full_model = tf.keras.Model(self.EDSR_model_l1.input, loss_model_outputs)
+        '''
+        # # if the line above doesn't work due to a type problem, make a list with lossModelOutputs:
+        # lossModelOutputs = [lossModelOutputs[i] for i in range(len(selectedLayers))]
+        '''
+        Y_train_loss_model = self.perceptual_loss_model.predict(self.EDSR_model_l1)
+        for layer in self.EDSR_full_model.layers[:]:
+            layer.trainable = False
+
 
     def train_l1(self, training_data, epochs, validation_data, verbose=2):
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate=PiecewiseConstantDecay(boundaries=[200000], values=[1e-4, 5e-5]))
-        self.loss_fxn = tf.keras.losses.MeanSquaredError()
-        self.EDSR_model.compile(optimizer=self.optimizer, loss=self.loss_fxn)
-        history = self.EDSR_model.fit(training_data, epochs=epochs, validation_data=validation_data, verbose=verbose)
+        self.optimizer_l1 = tf.keras.optimizers.Adam(learning_rate=PiecewiseConstantDecay(boundaries=[200000], values=[1e-4, 5e-5]))
+        self.loss_fxn_l1 = tf.keras.losses.MeanSquaredError()
+        self.EDSR_model_l1.compile(optimizer=self.optimizer_l1, loss=self.loss_fxn_l1)
+        history = self.EDSR_model_l1.fit(training_data, epochs=epochs, validation_data=validation_data, verbose=verbose)
+        print('FINISHED TRAINING USING L1 LOSS')
 
-        print('FINISHED TRAINING')
-
-    def train_perceptual(self):
-        pass
+    def train_perceptual(self, training_data, epochs, validation_data, verbose=2):
+        self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-4, 1e-5])
+        self.optimizer_perceptual = tf.keras.optimizers.Adam(learning_rate=self.learning_rate_perceptual)
+        self.EDSR_full_model.compile(optimizer=self.optimizer_perceptual, loss='mse')
+        self.EDSR_full_model.fit(training_data, epochs=epochs, validation_data=validation_data, verbose=2)
+        print('FINISHED TRAINING USING PERCEPTUAL LOSS')
 
     def test(self):
         pass
 
-    def predict(self, test_data):
-        return self.EDSR_model.predict(test_data)
+    def predict_l1(self, test_image):
+        return self.EDSR_model_l1.predict(test_image)
+
+    def predict_perceptual(self, test_image):
+        return self.EDSR_full_model.predict(test_image)
