@@ -1,7 +1,25 @@
+import os
 import PIL
+import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.preprocessing.image_dataset import image_dataset_from_directory
 
+def get_normalized_x_and_y(full_training_data_path, LR_size):
+    x = []
+    y = []
+
+    for file_name in os.listdir(full_training_data_path):
+        if file_name.endswith(".jpg"):
+            image_path = os.path.join(full_training_data_path, file_name)
+            y_image_PIL = tf.keras.preprocessing.image.load_img(image_path)
+            y_image_array = tf.keras.preprocessing.image.img_to_array(y_image_PIL)
+            y.append(y_image_array)
+            x_image_PIL = shrink_input(y_image_PIL, LR_size)
+            x_image_array = tf.keras.preprocessing.image.img_to_array(x_image_PIL)
+            x.append(x_image_array)
+    x = np.array(x)/255
+    y = np.array(y)/255
+    return x, y
 
 def get_normalized_data(image_path, batch_size, dimension):
     train_ds = image_dataset_from_directory(
@@ -33,18 +51,10 @@ def normalize(input_image):
 
 
 # Use TF Ops to process.
-def process_input(img, img_sz):
-    img = tf.image.rgb_to_yuv(img)
-    last_dimension_axis = len(img.shape) - 1
-    y, u, v = tf.split(img, 3, axis=last_dimension_axis)
-    # TODO: check method="area"? maybe bilinear instead?
-    return tf.image.resize(y, [img_sz, img_sz], method="area")
+def shrink_input(img, new_img_size):
+    # TODO: check method="area"? maybe bilinear or bicubic instead? (I see bicubic online a lot)
+    return tf.image.resize(img, [new_img_size, new_img_size], method="area")
 
-
-def process_target(img):
-    img = tf.image.rgb_to_yuv(img)
-    y, u, v = tf.split(img, 3, axis=len(img.shape) - 1)
-    return y
 
 def resize_image(image, resulting_size):
-    return image.resize((resulting_size, resulting_size), PIL.Image.BICUBIC)
+    return tf.image.resize(image, [resulting_size, resulting_size], PIL.Image.BICUBIC)

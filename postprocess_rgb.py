@@ -10,23 +10,6 @@ import mpl_toolkits
 from tensorflow.python.keras.preprocessing.image import img_to_array
 
 
-def rgb_to_yuv_normalized(image_data):
-    y, Cb, Cr = image_data.convert("YCbCr").split()
-    y = img_to_array(y)
-    y = y.astype("float32") / 255.0  # maybe no need for astype
-    return y, Cb, Cr
-
-
-def yuv_to_rgb(predicted_img, cb, cr):
-    img_y = predicted_img[0] * 255.0
-    img_y = img_y.clip(0, 255)
-    img_y = img_y.reshape((np.shape(img_y)[0], np.shape(img_y)[1]))
-    img_y = PIL.Image.fromarray(np.uint8(img_y), mode="L")
-    img_cb = cb.resize(img_y.size, PIL.Image.BICUBIC)
-    img_cr = cr.resize(img_y.size, PIL.Image.BICUBIC)
-    rgb_predicted_image = PIL.Image.merge("YCbCr", (img_y, img_cb, img_cr)).convert("RGB")
-    return rgb_predicted_image
-
 def save_result(img, resolution, file_name):
     """Plot the result with zoom-in area."""
     img_array = img_to_array(img)

@@ -1,7 +1,8 @@
 import os
-import preprocess
-import postprocess
-import model_subclassing
+
+import model_subclassing_rgb
+import preprocess_rgb
+import postprocess_rgb
 import tensorflow as tf
 import numpy as np
 
@@ -19,33 +20,12 @@ def main():
 
     # joining relative path to form a full path
     dirname = os.path.dirname(__file__)
-    image_path = os.path.join(dirname, "BSDS500/data/small_training_set")
-
-    train_data, validation_data = \
-        preprocess.get_normalized_data(image_path, batch_size, original_size)
-
-    # Scale from (0, 255) to (0, 1)
-    train_data = train_data.map(preprocess.normalize)
-    validation_data = validation_data.map(preprocess.normalize)
-
-    train_data = train_data.map(
-        lambda x: (preprocess.process_input(x, input_size), preprocess.process_target(x))
-    )
-
-    # prefetch is for computation optimization
-    train_data = train_data.prefetch(buffer_size=32)
-
-    validation_data = validation_data.map(
-        lambda x: (preprocess.process_input(x, input_size), preprocess.process_target(x))
-    )
-
-    # prefetch is for computation optimization
-    validation_data = validation_data.prefetch(buffer_size=32)
-
+    training_full_path = os.path.join(dirname, "BSDS500/data/small_training_set/small_training_set_child")
+    train_x, train_y = preprocess_rgb.get_normalized_x_and_y(training_full_path, HR_size, LR_size)
     print("PREPROCESSING IS DONE")
 
     # initialize the model
-    model = model_subclassing.EDSR_super(input_size)
+    model = model_subclassing_rgb.EDSR_super(input_size)
     '''
     # train the model using l1 loss
     weights_file = os.path.join(dirname, 'l1_training_weights.h5')
@@ -54,7 +34,7 @@ def main():
     '''
     # train the model using perceptual loss
     # TODO: implement perceptual loss
-    model.train_perceptual(training_data=train_data, epochs=epochs_for_perceptual, validation_data=validation_data,verbose=2)
+    model.train_perceptual(train_x=train_x, train_y=train_y, epochs=epochs_for_perceptual, verbose=2)
 
     # test the model and output results
     # set up the directory from where we get test images
@@ -69,24 +49,25 @@ def main():
         # load and preprocess test image
         test_image_path = os.path.join(test_path, file_name)
         HR_test_image = tf.keras.preprocessing.image.load_img(test_image_path)
-        LR_test_image = preprocess.resize_image(HR_test_image, LR_size)
+        # TODO: check why we don't use shrink_input here??? (used to be resize_image)
+        LR_test_image = preprocess_rgb.shrink_input(HR_test_image, LR_size)
         # TODO: upscale_image below
-        input_y, input_Cb, input_Cr, = postprocess.rgb_to_yuv_normalized(HR_test_image)
-        input = np.expand_dims(input_y, axis=0)
+        # input_y, input_Cb, input_Cr, = postprocess_rgb.rgb_to_yuv_normalized(HR_test_image)
+        # input = np.expand_dims(input_y, axis=0)
         # call model.predict and process yuv image to rgb
         '''
         yuv_predicted_image = model.predict_l1(input)
         '''
-        yuv_predicted_image = model.predict_perceptual(input)
+        predicted_image = model.predict_perceptual(LR_test_image)
 
-        rgb_predicted_image = postprocess.yuv_to_rgb(yuv_predicted_image, input_Cb, input_Cr)
+        # rgb_predicted_image = postprocess_rgb.yuv_to_rgb(yuv_predicted_image, input_Cb, input_Cr)
         # TODO: instead of using matplotlib, just output a png or jpeg from rgb_predicted_image
         # TODO: for now, we use matplotlib to see if ours works.
         file_name = os.path.splitext(file_name)[0]
-        postprocess.save_result(rgb_predicted_image, "predicted", str(file_name))
-        postprocess.save_result(HR_test_image, "HR", str(file_name))
-        LR_test_image_for_plot = preprocess.resize_image(HR_test_image, HR_size)
-        postprocess.save_result(LR_test_image_for_plot, "LR", str(file_name))
+        postprocess_rgb.save_result(predicted_image, "predicted", str(file_name))
+        postprocess_rgb.save_result(HR_test_image, "HR", str(file_name))
+        LR_test_image_for_plot = preprocess_rgb.resize_image(HR_test_image, HR_size)
+        postprocess_rgb.save_result(LR_test_image_for_plot, "LR", str(file_name))
 
 
 
