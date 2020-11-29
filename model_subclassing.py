@@ -98,7 +98,7 @@ class EDSR_super:
         # TODO: not implemented meanshift yet
         # initialize model
         self.EDSR_model_l1 = tf.keras.Model(inputs, x)
-        self.EDSR_model_l1.summary()
+        # self.EDSR_model_l1.summary()
 
 
         # TODO: MAYBE TRY CAFFE FOR PERCEPTUAL LOSS BECAUSE THAT IS APPARENTLY BETTER
@@ -121,6 +121,7 @@ class EDSR_super:
         loss_model_outputs = self.perceptual_loss_model(triple_output)
         # initialize fully connected model
         self.EDSR_full_model = tf.keras.Model(self.EDSR_model_l1.input, loss_model_outputs)
+        self.EDSR_full_model.summary()
         '''
         # # if the line above doesn't work due to a type problem, make a list with lossModelOutputs:
         # lossModelOutputs = [lossModelOutputs[i] for i in range(len(selectedLayers))]
@@ -136,7 +137,11 @@ class EDSR_super:
         print('FINISHED TRAINING USING L1 LOSS')
 
     def train_perceptual(self, training_data, epochs, validation_data, verbose=2):
-        triple_training_data = tf.keras.layers.Concatenate()([training_data, training_data, training_data])
+        training_data_list = list(training_data)
+        print(np.shape(training_data_list))
+        triple_training_data_list = np.concatenate((training_data_list, training_data_list, training_data_list), axis=-1)
+        triple_training_data_list = np.asarray(triple_training_data_list).astype('float32')
+        triple_training_data = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(triple_training_data_list))
         loss_model_labels = self.perceptual_loss_model.predict(triple_training_data)
         for layer in self.perceptual_loss_model.layers[:]:
             layer.trainable = False
