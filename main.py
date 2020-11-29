@@ -73,13 +73,15 @@ def main():
         input = np.expand_dims(input_y, axis=0)
         # call model.predict and process yuv image to rgb
         yuv_predicted_image = model.predict(input)
-        print(tf.shape(yuv_predicted_image))
         rgb_predicted_image = postprocess.yuv_to_rgb(yuv_predicted_image, input_Cb, input_Cr)
         # TODO: instead of using matplotlib, just output a png or jpeg from rgb_predicted_image
         # TODO: for now, we use matplotlib to see if ours works.
-        postprocess.show_result(rgb_predicted_image, "predicted", str("file_name.png"))
-        postprocess.show_result(HR_test_image, "HR", str("file_name.png"))
-        postprocess.show_result(LR_test_image, "LR", str("file_name.png"))
+        file_name = os.path.splitext(file_name)[0]
+        postprocess.save_result(rgb_predicted_image, "predicted", str(file_name))
+        postprocess.save_result(HR_test_image, "HR", str(file_name))
+        LR_test_image_for_plot = preprocess.resize_image(HR_test_image, HR_size)
+        postprocess.save_result(LR_test_image_for_plot, "LR", str(file_name))
+        # TODO: SAVE THESE IMAGES
 
 
 if __name__ == "__main__":
