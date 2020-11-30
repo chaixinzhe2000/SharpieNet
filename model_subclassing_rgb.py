@@ -76,7 +76,7 @@ class EDSR_super:
         # from keras tutorial
         # self.upscale_factor = upscale_factor
         # self.channels = channels
-        self.input_shape = (None, None, 1)
+        self.input_shape = (100, 100, 3)
 
         # model
         inputs = tf.keras.Input(shape=self.input_shape)
@@ -126,11 +126,11 @@ class EDSR_super:
         # lossModelOutputs = [lossModelOutputs[i] for i in range(len(selectedLayers))]
         '''
 
-    def train_l1(self, training_data, epochs, validation_data, verbose=2):
+    def train_l1(self, train_x, train_y, epochs, verbose=2):
         self.optimizer_l1 = tf.keras.optimizers.Adam(learning_rate=PiecewiseConstantDecay(boundaries=[200000], values=[1e-4, 5e-5]))
         self.loss_fxn_l1 = tf.keras.losses.MeanSquaredError()
         self.EDSR_model_l1.compile(optimizer=self.optimizer_l1, loss=self.loss_fxn_l1)
-        history = self.EDSR_model_l1.fit(training_data, epochs=epochs, validation_data=validation_data, verbose=verbose)
+        history = self.EDSR_model_l1.fit(x=train_x, y=train_y, epochs=epochs, verbose=verbose)
         print('FINISHED TRAINING USING L1 LOSS')
 
     def train_perceptual(self, train_x, train_y, epochs, verbose=2):
