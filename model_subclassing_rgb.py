@@ -109,7 +109,7 @@ class EDSR_super:
         for layer in self.perceptual_loss_model.layers:
             layer.trainable = False
 
-        selected_layers = [1, 3]
+        selected_layers = [1]
         selected_outputs = [self.perceptual_loss_model.layers[i].output for i in selected_layers]
         # TODO: change line above into the for loop below
         # for layer_index in selected_layers:

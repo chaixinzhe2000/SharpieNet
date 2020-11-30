@@ -45,29 +45,25 @@ def main():
         if file_name.endswith(".jpg"):
             list_of_test_img_paths.append(file_name)
 
-    for file_name in list_of_test_img_paths:
+    HR_test_images, LR_test_images = preprocess_rgb.get_normalized_x_and_y(test_path, HR_size, LR_size)
+
+    for i in range(len(LR_test_images)):
         # load and preprocess test image
         test_image_path = os.path.join(test_path, file_name)
-        HR_test_image = tf.keras.preprocessing.image.load_img(test_image_path)
-        # TODO: check why we don't use shrink_input here??? (used to be resize_image)
-        LR_test_image = preprocess_rgb.shrink_input(HR_test_image, LR_size)
-        # TODO: upscale_image below
-        # input_y, input_Cb, input_Cr, = postprocess_rgb.rgb_to_yuv_normalized(HR_test_image)
-        # input = np.expand_dims(input_y, axis=0)
-        # call model.predict and process yuv image to rgb
+
+
         '''
         yuv_predicted_image = model.predict_l1(input)
         '''
-        predicted_image = model.predict_perceptual(LR_test_image)
+        predicted_image = model.predict_perceptual(LR_test_images[i])
 
         # rgb_predicted_image = postprocess_rgb.yuv_to_rgb(yuv_predicted_image, input_Cb, input_Cr)
         # TODO: instead of using matplotlib, just output a png or jpeg from rgb_predicted_image
         # TODO: for now, we use matplotlib to see if ours works.
         file_name = os.path.splitext(file_name)[0]
-        postprocess_rgb.save_result(predicted_image, "predicted", str(file_name))
-        postprocess_rgb.save_result(HR_test_image, "HR", str(file_name))
-        LR_test_image_for_plot = preprocess_rgb.resize_image(HR_test_image, HR_size)
-        postprocess_rgb.save_result(LR_test_image_for_plot, "LR", str(file_name))
+        postprocess_rgb.save_result(predicted_image, "predicted", str(i))
+        postprocess_rgb.save_result(HR_test_images[i], "HR", str(i))
+        postprocess_rgb.save_result(LR_test_images[i], "LR", str(i))
 
 
 
