@@ -66,8 +66,8 @@ class EDSR_super:
         # from EDSR (torch)
         # self.number_of_resblocks = 32
         # self.number_of_features = 256
-        self.number_of_resblocks = 8
-        self.number_of_features = 64
+        self.number_of_resblocks = 2
+        self.number_of_features = 8
         self.kernel_size = 3
         self.res_scaling = 0.1
         self.scaling_factor = 3
@@ -109,13 +109,13 @@ class EDSR_super:
         for layer in self.perceptual_loss_model.layers:
             layer.trainable = False
 
-        selected_layers = [1]
+        selected_layers = [1, 4, 8, 9, 11, 17]
         selected_outputs = [self.perceptual_loss_model.layers[i].output for i in selected_layers]
         # TODO: change line above into the for loop below
         # for layer_index in selected_layers:
         #     selected_outputs.append(self.perceptual_loss_model[layer_index].output)
         self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
-        self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
+        # self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
 
         loss_model_outputs = self.perceptual_loss_model(self.EDSR_model_l1.output)
         # initialize fully connected model

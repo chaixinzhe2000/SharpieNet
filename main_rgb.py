@@ -45,7 +45,7 @@ def main():
         if file_name.endswith(".jpg"):
             list_of_test_img_paths.append(file_name)
 
-    HR_test_images, LR_test_images = preprocess_rgb.get_normalized_x_and_y(test_path, HR_size, LR_size)
+    LR_test_images, HR_test_images = preprocess_rgb.get_normalized_x_and_y(test_path, HR_size, LR_size)
 
     for i in range(len(LR_test_images)):
         # load and preprocess test image
@@ -55,15 +55,18 @@ def main():
         '''
         yuv_predicted_image = model.predict_l1(input)
         '''
-        predicted_image = model.predict_perceptual(LR_test_images[i])
+        print(np.shape(LR_test_images[i]))
+        input = np.expand_dims(LR_test_images[i], axis=0)
+        print(np.shape(LR_test_images[i]))
+        predicted_image = model.predict_l1(input)
 
         # rgb_predicted_image = postprocess_rgb.yuv_to_rgb(yuv_predicted_image, input_Cb, input_Cr)
         # TODO: instead of using matplotlib, just output a png or jpeg from rgb_predicted_image
         # TODO: for now, we use matplotlib to see if ours works.
         file_name = os.path.splitext(file_name)[0]
-        postprocess_rgb.save_result(predicted_image, "predicted", str(i))
-        postprocess_rgb.save_result(HR_test_images[i], "HR", str(i))
-        postprocess_rgb.save_result(LR_test_images[i], "LR", str(i))
+        postprocess_rgb.save_result(predicted_image[0]*255, "predicted", str(i))
+        postprocess_rgb.save_result(HR_test_images[i]*255, "HR", str(i))
+        postprocess_rgb.save_result(LR_test_images[i]*255, "LR", str(i))
 
 
 
