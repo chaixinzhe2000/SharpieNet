@@ -39,7 +39,7 @@ def main():
     '''
     # train the model using perceptual loss
     # TODO: implement perceptual loss
-    model.train_l1(train_x=train_x, train_y=train_y, epochs=epochs_for_perceptual, verbose=2)
+    model.train_perceptual(train_x=train_x, train_y=train_y, epochs=epochs_for_perceptual, verbose=2)
 
     # test the model and output results
     # set up the directory from where we get test images
