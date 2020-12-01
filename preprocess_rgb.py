@@ -21,15 +21,7 @@ def get_normalized_x_and_y(full_training_data_path, HR_size, LR_size):
             x_image_PIL = tf.image.resize(y_image_array_cropped, [LR_size, LR_size], method="area")
             x_image_array = tf.keras.preprocessing.image.img_to_array(x_image_PIL)
             x.append(x_image_array)
-<<<<<<< Updated upstream
-    # global_mean_red = np.sum(y[:])/number_of_images
-    # global_mean_green = np.sum(y[:])/number_of_images
-    # global_mean_blue = np.sum(y[:])/number_of_images
-    # global_mean_rgb = [global_mean_red, global_mean_green, global_mean_blue]
-    # print(global_mean_rgb)
-    x = np.array(x)/255
-    y = np.array(y)/255
-=======
+
     x = np.array(x, dtype="float32")
     y = np.array(y, dtype="float32")
     global_rgb_mean = np.mean(y, axis=tuple(range(y.ndim-1)), dtype="float64")
@@ -37,12 +29,7 @@ def get_normalized_x_and_y(full_training_data_path, HR_size, LR_size):
     x /= 255.0
     y /= 255.0
     return x, y, global_rgb_mean, global_rgb_std
->>>>>>> Stashed changes
 
-    # return x, y, global_mean_rgb
-    print(x[0])
-    print(y[0])
-    return x, y
 
 
 

@@ -21,13 +21,10 @@ def main():
     # joining relative path to form a full path
     dirname = os.path.dirname(__file__)
     training_full_path = os.path.join(dirname, "BSDS500/data/images/train")
-<<<<<<< Updated upstream
-    train_x, train_y = preprocess_rgb.get_normalized_x_and_y(training_full_path, HR_size, LR_size)
-=======
+
     train_x, train_y, global_rgb_mean, global_rgb_std = preprocess_rgb.get_normalized_x_and_y(training_full_path, HR_size, LR_size)
     # train_x, train_y = preprocess_rgb.further_normalization(train_x, train_y, global_rgb_mean, global_rgb_std)
 
->>>>>>> Stashed changes
     print("PREPROCESSING IS DONE")
 
     # initialize the model
@@ -69,13 +66,12 @@ def main():
         # TODO: instead of using matplotlib, just output a png or jpeg from rgb_predicted_image
         # TODO: for now, we use matplotlib to see if ours works.
         file_name = os.path.splitext(file_name)[0]
-<<<<<<< Updated upstream
+
         # print(predicted_image)
         postprocess_rgb.save_result(predicted_image[0]*255, "predicted", str(i))
         postprocess_rgb.save_result(HR_test_images[i]*255, "HR", str(i))
         postprocess_rgb.save_result(LR_test_images[i]*255, "LR", str(i))
-=======
->>>>>>> Stashed changes
+
 
         # denormalized_LR = LR_test_images*global_rgb_std + global_rgb_mean
         # denormalized_HR = HR_test_images*global_rgb_std + global_rgb_mean
@@ -87,7 +83,7 @@ def main():
 
         vgg_mean_rgb = np.array([123.68, 116.78, 103.94])
 
-        postprocess_rgb.save_result(predicted_image[0]*255.0+vgg_mean_rgb, "predicted", str(i))
+        postprocess_rgb.save_result(predicted_image[0]*255.0+vgg_mean_rgb, "predicted with VGGMEAN", str(i))
         postprocess_rgb.save_result(HR_test_images[i]*255.0, "HR", str(i))
         postprocess_rgb.save_result(LR_test_images[i]*255.0, "LR", str(i))
 
