@@ -13,7 +13,7 @@ def main():
     original_size = 300
     upscale_factor = 3
     epochs_for_l1 = 1
-    epochs_for_perceptual = 1
+    epochs_for_perceptual = 3
     input_size = original_size // upscale_factor
     LR_size = input_size
     HR_size = original_size
@@ -21,7 +21,13 @@ def main():
     # joining relative path to form a full path
     dirname = os.path.dirname(__file__)
     training_full_path = os.path.join(dirname, "BSDS500/data/images/train")
+<<<<<<< Updated upstream
     train_x, train_y = preprocess_rgb.get_normalized_x_and_y(training_full_path, HR_size, LR_size)
+=======
+    train_x, train_y, global_rgb_mean, global_rgb_std = preprocess_rgb.get_normalized_x_and_y(training_full_path, HR_size, LR_size)
+    # train_x, train_y = preprocess_rgb.further_normalization(train_x, train_y, global_rgb_mean, global_rgb_std)
+
+>>>>>>> Stashed changes
     print("PREPROCESSING IS DONE")
 
     # initialize the model
@@ -45,7 +51,8 @@ def main():
         if file_name.endswith(".jpg"):
             list_of_test_img_paths.append(file_name)
 
-    LR_test_images, HR_test_images = preprocess_rgb.get_normalized_x_and_y(test_path, HR_size, LR_size)
+    LR_test_images, HR_test_images, global_rgb_mean, global_rgb_std = preprocess_rgb.get_normalized_x_and_y(test_path, HR_size, LR_size)
+    # LR_test_images, HR_test_images = preprocess_rgb.further_normalization(train_x, train_y, global_rgb_mean, global_rgb_std)
 
     for i in range(len(LR_test_images)):
         # load and preprocess test image
@@ -55,18 +62,34 @@ def main():
         '''
         print(np.shape(LR_test_images[i]))
         input = np.expand_dims(LR_test_images[i], axis=0)
-        print(np.shape(LR_test_images[i]))
+        print(np.shape(input))
         predicted_image = model.predict_l1(input)
 
         # rgb_predicted_image = postprocess_rgb.yuv_to_rgb(yuv_predicted_image, input_Cb, input_Cr)
         # TODO: instead of using matplotlib, just output a png or jpeg from rgb_predicted_image
         # TODO: for now, we use matplotlib to see if ours works.
         file_name = os.path.splitext(file_name)[0]
+<<<<<<< Updated upstream
         # print(predicted_image)
         postprocess_rgb.save_result(predicted_image[0]*255, "predicted", str(i))
         postprocess_rgb.save_result(HR_test_images[i]*255, "HR", str(i))
         postprocess_rgb.save_result(LR_test_images[i]*255, "LR", str(i))
+=======
+>>>>>>> Stashed changes
 
+        # denormalized_LR = LR_test_images*global_rgb_std + global_rgb_mean
+        # denormalized_HR = HR_test_images*global_rgb_std + global_rgb_mean
+        # denormalized_predicted = predicted_image[0]*global_rgb_std + global_rgb_mean
+        #
+        # postprocess_rgb.save_result(denormalized_predicted, "predicted", str(i))
+        # postprocess_rgb.save_result(denormalized_HR, "HR", str(i))
+        # postprocess_rgb.save_result(denormalized_LR, "LR", str(i))
+
+        vgg_mean_rgb = np.array([123.68, 116.78, 103.94])
+
+        postprocess_rgb.save_result(predicted_image[0]*255.0+vgg_mean_rgb, "predicted", str(i))
+        postprocess_rgb.save_result(HR_test_images[i]*255.0, "HR", str(i))
+        postprocess_rgb.save_result(LR_test_images[i]*255.0, "LR", str(i))
 
 
 

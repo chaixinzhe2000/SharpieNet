@@ -14,15 +14,16 @@ from tensorflow.python.keras.optimizer_v2.learning_rate_schedule import Piecewis
 
 
 class ResBlock(tf.keras.layers.Layer):
-    def __init__(self, model, kernel_size, filters):
+    def __init__(self, model, kernel_size, filters, initializer):
         super(ResBlock, self).__init__()
+        self.initializer = initializer
         self.conv1 = tf.keras.layers.Conv2D(filters, kernel_size, strides=(1, 1),
                                             padding="SAME",
-                                            kernel_initializer="Orthogonal")
+                                            kernel_initializer=self.initializer)
         self.activation_fxn = tf.keras.activations.relu
         self.conv2 = tf.keras.layers.Conv2D(filters, kernel_size, strides=(1, 1),
                                             padding="SAME",
-                                            kernel_initializer="Orthogonal")
+                                            kernel_initializer=self.initializer)
 
         # self.res_factor = res_factor
 
@@ -39,15 +40,16 @@ class ResBlock(tf.keras.layers.Layer):
 # no batch norm
 # no activation function
 class Upsampler(tf.keras.layers.Layer):
-    def __init__(self, model, number_of_features):
+    def __init__(self, model, number_of_features, initializer):
         super(Upsampler, self).__init__()
         # ONLY WORKS FOR model.scaling_factor == 3 and MAYBE model.kernel_size == 3
         self.model_scaling_factor = model.scaling_factor
+        self.initializer = initializer
         if model.scaling_factor == 3:
             self.conv1 = tf.keras.layers.Conv2D(number_of_features * (model.scaling_factor ** 2),
                                                 model.kernel_size, strides=(1, 1),
                                                 padding="SAME",
-                                                kernel_initializer="Orthogonal")
+                                                kernel_initializer=self.initializer)
             # TODO: CAN I DEFINE A FUNCTION LIKE THIS?
             self.pixel_shuffle = tf.nn.depth_to_space
         else:
@@ -66,10 +68,15 @@ class EDSR_super:
         # from EDSR (torch)
         # self.number_of_resblocks = 32
         # self.number_of_features = 256
+<<<<<<< Updated upstream
         self.number_of_resblocks = 4
         self.number_of_features = 16
+=======
+        self.number_of_resblocks = 16
+        self.number_of_features = 128
+>>>>>>> Stashed changes
         self.kernel_size = 3
-        self.res_scaling = 0.1
+        self.res_scaling = 0.2
         self.scaling_factor = 3
         self.final_output_channels = 3
 
@@ -89,9 +96,9 @@ class EDSR_super:
         # body
         # TODO: Not sure if we can for loop like this
         for i in range(self.number_of_resblocks):
-            x = ResBlock(self, self.kernel_size, self.number_of_features).call(model=self, input_tensor=x)
+            x = ResBlock(self, self.kernel_size, self.number_of_features, "Orthogonal").call(model=self, input_tensor=x)
         # tail
-        x = Upsampler(model=self, number_of_features=self.number_of_features).call(x)
+        x = Upsampler(model=self, number_of_features=self.number_of_features, initializer=tf.keras.initializers.GlorotUniform()).call(x)
         x = tf.keras.layers.Conv2D(self.final_output_channels, self.kernel_size, strides=(1, 1),
                                    padding="SAME", kernel_initializer="Orthogonal")(x)
         # add mean (mean shift)
@@ -111,6 +118,7 @@ class EDSR_super:
         for layer in self.perceptual_loss_model.layers:
             layer.trainable = False
 
+<<<<<<< Updated upstream
         # this is for multiple feature extracts.
         # selected_layers = [1, 4, 8, 9, 11, 17]
         # selected_outputs = [self.perceptual_loss_model.layers[i].output for i in selected_layers]
@@ -118,10 +126,14 @@ class EDSR_super:
         # this is for one feature extract layer
         selected_outputs = self.perceptual_loss_model.layers[12].output
 
+=======
+        # selected_layers = [22]
+        # selected_outputs = [self.perceptual_loss_model.layers[i].output for i in selected_layers]
+>>>>>>> Stashed changes
         # TODO: change line above into the for loop below
         # for layer_index in selected_layers:
         #     selected_outputs.append(self.perceptual_loss_model[layer_index].output)
-        self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
+        self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, self.perceptual_loss_model.layers[12].output)
         # self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
 
         loss_model_outputs = self.perceptual_loss_model(self.EDSR_model_l1.output)
@@ -141,14 +153,24 @@ class EDSR_super:
         print('FINISHED TRAINING USING L1 LOSS')
 
     def train_perceptual(self, train_x, train_y, epochs, verbose=2):
-
+        self.vgg_mean_rgb = np.array([123.68, 116.78, 103.94])
+        train_y = train_y-self.vgg_mean_rgb
         self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-4, 1e-5])
         self.optimizer_full = tf.keras.optimizers.Adam(learning_rate=self.learning_rate_perceptual)
+<<<<<<< Updated upstream
         Y_train_feature_sets = self.perceptual_loss_model.predict(train_y)
+=======
+        Y_train_perceptual_loss = self.perceptual_loss_model.predict(train_y)
+
+>>>>>>> Stashed changes
         self.EDSR_full_model.compile(optimizer=self.optimizer_full, loss='mse')
         self.EDSR_full_model.summary()
         print('FINISHED COMPILING FULL MODEL \n STARTING TO TRAIN NOW')
+<<<<<<< Updated upstream
         self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, epochs=epochs, verbose=verbose)
+=======
+        self.EDSR_full_model.fit(x=train_x, y=Y_train_perceptual_loss, batch_size = 10, epochs=epochs, verbose=verbose)
+>>>>>>> Stashed changes
         print('FINISHED TRAINING USING PERCEPTUAL LOSS')
 
     def test_perceptual_loss(self, image_x_np_array, image_y_np_array):
