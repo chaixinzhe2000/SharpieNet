@@ -5,15 +5,17 @@ import preprocess_rgb
 import postprocess_rgb
 import tensorflow as tf
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 
 def main():
     # defining hyperparameters
-    batch_size = 8
+    batch_size = 10
     original_size = 300
     upscale_factor = 3
     epochs_for_l1 = 1
-    epochs_for_perceptual = 3
+    epochs_for_perceptual = 150
     input_size = original_size // upscale_factor
     LR_size = input_size
     HR_size = original_size
@@ -86,6 +88,7 @@ def main():
         postprocess_rgb.save_result(predicted_image[0]*255.0+vgg_mean_rgb, "predicted with VGGMEAN", str(i))
         postprocess_rgb.save_result(HR_test_images[i]*255.0, "HR", str(i))
         postprocess_rgb.save_result(LR_test_images[i]*255.0, "LR", str(i))
+        plt.close('all')
 
 
 
