@@ -156,9 +156,8 @@ class EDSR_super:
         self.optimizer_full = tf.keras.optimizers.Adam(learning_rate=self.learning_rate_perceptual)
 
         Y_train_feature_sets = self.perceptual_loss_model.predict(train_y)
-
-        self.EDSR_full_model.compile(optimizer=self.optimizer_full, loss='mse')
         self.EDSR_full_model.summary()
+        self.EDSR_full_model.compile(optimizer=self.optimizer_full, loss='mse')
         print('FINISHED COMPILING FULL MODEL \n STARTING TO TRAIN NOW')
 
         self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, epochs=epochs, verbose=verbose)
