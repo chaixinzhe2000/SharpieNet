@@ -112,7 +112,7 @@ class EDSR_super:
         # x = tf.keras.activations.sigmoid(x)
         # initialize model
         self.EDSR_model_l1 = tf.keras.Model(inputs, x)
-        # self.EDSR_model_l1.summary()
+        self.EDSR_model_l1.summary()
 
 
         # TODO: MAYBE TRY CAFFE FOR PERCEPTUAL LOSS BECAUSE THAT IS APPARENTLY BETTER
@@ -139,6 +139,7 @@ class EDSR_super:
         # for layer_index in selected_layers:
         #     selected_outputs.append(self.perceptual_loss_model[layer_index].output)
         self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
+        self.perceptual_loss_model.summary()
         # self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
 
         loss_model_outputs = self.perceptual_loss_model(vgg16_preprocessing_layer().call(self.EDSR_model_l1.output))
@@ -158,7 +159,7 @@ class EDSR_super:
         print('FINISHED TRAINING USING L1 LOSS')
 
     def train_perceptual(self, train_x, train_y, epochs, verbose=2):
-        self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-4, 1e-5])
+        self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-3, 1e-5])
         self.optimizer_full = tf.keras.optimizers.Adam(learning_rate=self.learning_rate_perceptual)
 
         train_y *= 255.0
