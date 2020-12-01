@@ -22,7 +22,7 @@ def main():
     image_path = os.path.join(dirname, "BSDS500/data/small_training_set")
 
     train_data, validation_data = \
-        preprocess.get_normalized_data(image_path, batch_size, original_size)
+        preprocess.get_datasets(image_path, batch_size, original_size)
 
     # Scale from (0, 255) to (0, 1)
     train_data = train_data.map(preprocess.normalize)

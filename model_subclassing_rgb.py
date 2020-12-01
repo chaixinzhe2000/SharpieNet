@@ -66,8 +66,8 @@ class EDSR_super:
         # from EDSR (torch)
         # self.number_of_resblocks = 32
         # self.number_of_features = 256
-        self.number_of_resblocks = 2
-        self.number_of_features = 8
+        self.number_of_resblocks = 4
+        self.number_of_features = 16
         self.kernel_size = 3
         self.res_scaling = 0.1
         self.scaling_factor = 3
@@ -96,6 +96,8 @@ class EDSR_super:
                                    padding="SAME", kernel_initializer="Orthogonal")(x)
         # add mean (mean shift)
         # TODO: not implemented meanshift yet
+        # normalize outputs
+        # x = tf.keras.activations.sigmoid(x)
         # initialize model
         self.EDSR_model_l1 = tf.keras.Model(inputs, x)
         # self.EDSR_model_l1.summary()
@@ -109,8 +111,13 @@ class EDSR_super:
         for layer in self.perceptual_loss_model.layers:
             layer.trainable = False
 
-        selected_layers = [1, 4, 8, 9, 11, 17]
-        selected_outputs = [self.perceptual_loss_model.layers[i].output for i in selected_layers]
+        # this is for multiple feature extracts.
+        # selected_layers = [1, 4, 8, 9, 11, 17]
+        # selected_outputs = [self.perceptual_loss_model.layers[i].output for i in selected_layers]
+
+        # this is for one feature extract layer
+        selected_outputs = self.perceptual_loss_model.layers[12].output
+
         # TODO: change line above into the for loop below
         # for layer_index in selected_layers:
         #     selected_outputs.append(self.perceptual_loss_model[layer_index].output)
@@ -120,7 +127,7 @@ class EDSR_super:
         loss_model_outputs = self.perceptual_loss_model(self.EDSR_model_l1.output)
         # initialize fully connected model
         self.EDSR_full_model = tf.keras.Model(self.EDSR_model_l1.input, loss_model_outputs)
-        self.EDSR_full_model.summary()
+
         '''
         # # if the line above doesn't work due to a type problem, make a list with lossModelOutputs:
         # lossModelOutputs = [lossModelOutputs[i] for i in range(len(selectedLayers))]
@@ -137,14 +144,17 @@ class EDSR_super:
 
         self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-4, 1e-5])
         self.optimizer_full = tf.keras.optimizers.Adam(learning_rate=self.learning_rate_perceptual)
-        Y_train_perceptual_loss = self.perceptual_loss_model.predict(train_y)
+        Y_train_feature_sets = self.perceptual_loss_model.predict(train_y)
         self.EDSR_full_model.compile(optimizer=self.optimizer_full, loss='mse')
+        self.EDSR_full_model.summary()
         print('FINISHED COMPILING FULL MODEL \n STARTING TO TRAIN NOW')
-        self.EDSR_full_model.fit(x=train_x, y=Y_train_perceptual_loss, epochs=epochs, verbose=verbose)
+        self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, epochs=epochs, verbose=verbose)
         print('FINISHED TRAINING USING PERCEPTUAL LOSS')
 
-    def test(self):
-        pass
+    def test_perceptual_loss(self, image_x_np_array, image_y_np_array):
+        image_x = self.perceptual_loss_model.predict(image_x_np_array)
+        image_y = self.perceptual_loss_model.predict(image_y_np_array)
+        print("MEAN SQUARED ERROR PERCEPTUAL LOSS: ", np.mean((image_y - image_x)**2))
 
     def predict_l1(self, test_image):
         return self.EDSR_model_l1.predict(test_image)

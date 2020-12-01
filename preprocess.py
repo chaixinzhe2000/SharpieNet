@@ -4,24 +4,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.preprocessing.image_dataset import image_dataset_from_directory
 
-def get_normalized_x_and_y(full_training_data_path, LR_size):
-    x = []
-    y = []
-
-    for file_name in os.listdir(full_training_data_path):
-        if file_name.endswith(".jpg"):
-            image_path = os.path.join(full_training_data_path, file_name)
-            y_image_PIL = tf.keras.preprocessing.image.load_img(image_path)
-            y_image_array = tf.keras.preprocessing.image.img_to_array(y_image_PIL)
-            y.append(y_image_array)
-            x_image_PIL = shrink_input(y_image_PIL, LR_size)
-            x_image_array = tf.keras.preprocessing.image.img_to_array(x_image_PIL)
-            x.append(x_image_array)
-    x = np.array(x)/255
-    y = np.array(y)/255
-    return x, y
-
-def get_normalized_data(image_path, batch_size, dimension):
+def get_datasets(image_path, batch_size, dimension):
     train_ds = image_dataset_from_directory(
         image_path,
         batch_size=batch_size,

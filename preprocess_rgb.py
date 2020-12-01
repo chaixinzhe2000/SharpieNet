@@ -8,8 +8,10 @@ from tensorflow.python.keras.preprocessing.image_dataset import image_dataset_fr
 def get_normalized_x_and_y(full_training_data_path, HR_size, LR_size):
     x = []
     y = []
+    number_of_images = 0
     for file_name in os.listdir(full_training_data_path):
         if file_name.endswith(".jpg"):
+            number_of_images+=1
             image_path = os.path.join(full_training_data_path, file_name)
             y_image_PIL = tf.keras.preprocessing.image.load_img(image_path)
             y_image_array = tf.keras.preprocessing.image.img_to_array(y_image_PIL)
@@ -19,10 +21,18 @@ def get_normalized_x_and_y(full_training_data_path, HR_size, LR_size):
             x_image_PIL = tf.image.resize(y_image_array_cropped, [LR_size,LR_size])
             x_image_array = tf.keras.preprocessing.image.img_to_array(x_image_PIL)
             x.append(x_image_array)
+    # global_mean_red = np.sum(y[:])/number_of_images
+    # global_mean_green = np.sum(y[:])/number_of_images
+    # global_mean_blue = np.sum(y[:])/number_of_images
+    # global_mean_rgb = [global_mean_red, global_mean_green, global_mean_blue]
+    # print(global_mean_rgb)
     x = np.array(x)/255
     y = np.array(y)/255
-    return x, y
 
+    # return x, y, global_mean_rgb
+    print(x[0])
+    print(y[0])
+    return x, y
 
 def get_normalized_data(image_path, batch_size, dimension):
     train_ds = image_dataset_from_directory(
