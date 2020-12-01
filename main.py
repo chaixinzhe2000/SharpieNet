@@ -11,15 +11,15 @@ def main():
     batch_size = 8
     original_size = 300
     upscale_factor = 3
-    epochs_for_l1 = 1
-    epochs_for_perceptual = 1
+    epochs_for_l1 = 200
+    # epochs_for_perceptual = 1
     input_size = original_size // upscale_factor
     LR_size = input_size
     HR_size = original_size
 
     # joining relative path to form a full path
     dirname = os.path.dirname(__file__)
-    image_path = os.path.join(dirname, "BSDS500/data/small_training_set")
+    image_path = os.path.join(dirname, "BSDS500/data/images")
 
     train_data, validation_data = \
         preprocess.get_normalized_data(image_path, batch_size, original_size)
