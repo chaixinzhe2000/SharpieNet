@@ -70,7 +70,7 @@ class EDSR_super:
         # self.number_of_features = 256
 
         self.number_of_resblocks = 16
-        self.number_of_features = 128
+        self.number_of_features = 64
 
         self.kernel_size = 3
         self.res_scaling = 0.2
