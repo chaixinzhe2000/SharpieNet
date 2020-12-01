@@ -31,8 +31,6 @@ def get_normalized_x_and_y(full_training_data_path, HR_size, LR_size):
     return x, y, global_rgb_mean, global_rgb_std
 
 
-
-
 def further_normalization(train_x, train_y, global_rgb_mean, global_rgb_std):
     train_x = (train_x-global_rgb_mean)/global_rgb_std
     train_y = (train_y-global_rgb_mean)/global_rgb_std

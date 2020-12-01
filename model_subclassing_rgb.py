@@ -61,6 +61,14 @@ class Upsampler(tf.keras.layers.Layer):
         x = self.pixel_shuffle(x, self.model_scaling_factor)
         return x
 
+class vgg16_preprocessing_layer(tf.keras.layers.Layer):
+    def __init__(self):
+        super(vgg16_preprocessing_layer, self).__init__()
+        # ONLY WORKS FOR model.scaling_factor == 3 and MAYBE model.kernel_size == 3
+
+    def call(self, input_tensor):
+        input_tensor *= 255.0
+        return tf.keras.applications.vgg16.preprocess_input(input_tensor)
 
 # EDSR super class
 class EDSR_super:
@@ -69,8 +77,8 @@ class EDSR_super:
         # self.number_of_resblocks = 32
         # self.number_of_features = 256
 
-        self.number_of_resblocks = 10
-        self.number_of_features = 128
+        self.number_of_resblocks = 2
+        self.number_of_features = 16
 
         self.kernel_size = 3
         self.res_scaling = 0.2
@@ -109,8 +117,8 @@ class EDSR_super:
 
         # TODO: MAYBE TRY CAFFE FOR PERCEPTUAL LOSS BECAUSE THAT IS APPARENTLY BETTER
         # set up ESDR model using vgg16 perceptual loss
-        self.perceptual_loss_model = tf.keras.applications.VGG16(include_top=False, weights="imagenet",
-                                                                 input_shape=(300, 300, 3))
+        self.perceptual_loss_model = tf.keras.applications.vgg16.VGG16(include_top=False, weights="imagenet",
+                                                                       input_shape=(300, 300, 3))
         self.perceptual_loss_model.trainable = False
         for layer in self.perceptual_loss_model.layers:
             layer.trainable = False
@@ -133,7 +141,7 @@ class EDSR_super:
         self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
         # self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
 
-        loss_model_outputs = self.perceptual_loss_model(self.EDSR_model_l1.output)
+        loss_model_outputs = self.perceptual_loss_model(vgg16_preprocessing_layer().call(self.EDSR_model_l1.output))
         # initialize fully connected model
         self.EDSR_full_model = tf.keras.Model(self.EDSR_model_l1.input, loss_model_outputs)
 
@@ -150,11 +158,11 @@ class EDSR_super:
         print('FINISHED TRAINING USING L1 LOSS')
 
     def train_perceptual(self, train_x, train_y, epochs, verbose=2):
-        self.vgg_mean_rgb = np.array([123.68, 116.78, 103.94])
-        train_y = train_y-self.vgg_mean_rgb
         self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-4, 1e-5])
         self.optimizer_full = tf.keras.optimizers.Adam(learning_rate=self.learning_rate_perceptual)
 
+        train_y *= 255.0
+        train_y = tf.keras.applications.vgg16.preprocess_input(train_y)
         Y_train_feature_sets = self.perceptual_loss_model.predict(train_y)
         self.EDSR_full_model.summary()
         self.EDSR_full_model.compile(optimizer=self.optimizer_full, loss='mse')
