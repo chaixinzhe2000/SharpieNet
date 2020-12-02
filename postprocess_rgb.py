@@ -39,5 +39,6 @@ def save_result(img, resolution, file_name, run_trial_id):
     # plt.savefig("results/TRIAL_"+str(run_trial_id)+"/"+file_name+"-"+resolution+".png")
     plt.savefig("results/TRIAL"+str(run_trial_id)+"-IM"+file_name+"-"+resolution+".png")
 
-
+if __name__ == "__main__":
+    main()
 
