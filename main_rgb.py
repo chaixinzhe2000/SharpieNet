@@ -5,6 +5,7 @@ import preprocess_rgb
 import postprocess_rgb
 import tensorflow as tf
 import numpy as np
+import random
 import matplotlib.pyplot as plt
 
 
@@ -19,6 +20,7 @@ def main():
     input_size = original_size // upscale_factor
     LR_size = input_size
     HR_size = original_size
+    run_trial_id = random.randint(0, 1000)
 
     # joining relative path to form a full path
     dirname = os.path.dirname(__file__)
@@ -39,7 +41,7 @@ def main():
     '''
     # train the model using perceptual loss
     # TODO: implement perceptual loss
-    model.train_perceptual(train_x=train_x, train_y=train_y, epochs=epochs_for_perceptual, batch_size=batch_size, verbose=2)
+    model.train_perceptual(train_x=train_x, train_y=train_y, epochs=epochs_for_perceptual, batch_size=batch_size, run_trial_id=run_trial_id, verbose=2)
 
     # test the model and output results
     # set up the directory from where we get test images
@@ -70,9 +72,9 @@ def main():
         file_name = os.path.splitext(file_name)[0]
 
         # print(predicted_image)
-        postprocess_rgb.save_result(predicted_image[0]*255, "predicted", str(i))
-        postprocess_rgb.save_result(HR_test_images[i]*255, "HR", str(i))
-        postprocess_rgb.save_result(LR_test_images[i]*255, "LR", str(i))
+        postprocess_rgb.save_result(predicted_image[0]*255, "predicted", str(i), run_trial_id)
+        postprocess_rgb.save_result(HR_test_images[i]*255, "HR", str(i), run_trial_id)
+        postprocess_rgb.save_result(LR_test_images[i]*255, "LR", str(i), run_trial_id)
 
 
         # denormalized_LR = LR_test_images*global_rgb_std + global_rgb_mean

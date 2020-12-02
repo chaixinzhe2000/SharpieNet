@@ -10,7 +10,7 @@ import mpl_toolkits
 from tensorflow.python.keras.preprocessing.image import img_to_array
 
 
-def save_result(img, resolution, file_name):
+def save_result(img, resolution, file_name, run_trial_id):
     """Plot the result with zoom-in area."""
     img_array = img_to_array(img)
     img_array = img_array.astype("float32") / 255.0
@@ -36,7 +36,7 @@ def save_result(img, resolution, file_name):
 
     # Make the line.
     # mark_inset(ax, axins, loc1=1, loc2=3, fc="none", ec="blue")
-    plt.savefig("/results/"+file_name+"-"+resolution+".png")
+    plt.savefig("results/"+str(run_trial_id)+file_name+"-"+resolution+".png")
 
 
 

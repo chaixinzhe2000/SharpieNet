@@ -160,7 +160,7 @@ class EDSR_super:
         history = self.EDSR_model_l1.fit(x=train_x, y=train_y, epochs=epochs, verbose=verbose)
         print('FINISHED TRAINING USING L1 LOSS')
 
-    def train_perceptual(self, train_x, train_y, epochs, batch_size, verbose=2):
+    def train_perceptual(self, train_x, train_y, epochs, batch_size, run_trial_id, verbose=2):
         self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-3, 6e-5])
         self.optimizer_full = tf.keras.optimizers.Adam(learning_rate=self.learning_rate_perceptual)
 
@@ -173,7 +173,7 @@ class EDSR_super:
         self.EDSR_full_model.compile(optimizer=self.optimizer_full, loss='mse', metrics=['mse'])
         print('FINISHED COMPILING FULL MODEL \n STARTING TO TRAIN NOW')
 
-        filepath = "saved_models/rb"+str(self.number_of_resblocks)+"-feats_"+str(self.number_of_features)+"-bsz_"+str(batch_size)+"-e_{epoch:02d}-l_{loss:.1f}.hdf5"
+        filepath = "saved_models/"+str(run_trial_id)+"/RB"+str(self.number_of_resblocks)+"-FEATS_"+str(self.number_of_features)+"-BSZ_"+str(batch_size)+"-EPOCH_{epoch:02d}-LOSS_{loss:.1f}.hdf5"
         checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, mode='auto', save_freq=int(np.shape(train_x)[0]/batch_size))
 
         self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, batch_size=batch_size, epochs=epochs, verbose=verbose, callbacks=[checkpoint])
