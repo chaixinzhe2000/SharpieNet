@@ -113,7 +113,7 @@ class EDSR_super:
         # normalize outputs
         # x = tf.keras.activations.sigmoid(x)
         # initialize model
-        self.EDSR_model_l1 = tf.keras.Model(inputs, x)
+        self.EDSR_model_l1 = tf.keras.Model(inputs, x, name="MAIN_MODEL")
         self.EDSR_model_l1.summary()
 
 
@@ -140,13 +140,13 @@ class EDSR_super:
         # TODO: change line above into the for loop below
         # for layer_index in selected_layers:
         #     selected_outputs.append(self.perceptual_loss_model[layer_index].output)
-        self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
+        self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs, name="VGG16_partial_for_loss")
         self.perceptual_loss_model.summary()
         # self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
 
         loss_model_outputs = self.perceptual_loss_model(vgg16_preprocessing_layer().call(self.EDSR_model_l1.output))
         # initialize fully connected model
-        self.EDSR_full_model = tf.keras.Model(self.EDSR_model_l1.input, loss_model_outputs)
+        self.EDSR_full_model = tf.keras.Model(self.EDSR_model_l1.input, loss_model_outputs, name="FULL_MODEL")
 
         '''
         # # if the line above doesn't work due to a type problem, make a list with lossModelOutputs:
