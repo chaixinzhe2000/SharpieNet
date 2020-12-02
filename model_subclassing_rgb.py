@@ -81,11 +81,13 @@ class EDSR_super:
 
         self.number_of_resblocks = 2
         self.number_of_features = 2
+        self.vgg_out_layer = 12
 
         self.kernel_size = 3
         self.res_scaling = 0.2
         self.scaling_factor = 3
         self.final_output_channels = 3
+
 
         # from keras tutorial
         # self.upscale_factor = upscale_factor
@@ -131,7 +133,7 @@ class EDSR_super:
         # selected_outputs = [self.perceptual_loss_model.layers[i].output for i in selected_layers]
 
         # this is for one feature extract layer
-        selected_outputs = self.perceptual_loss_model.layers[5].output
+        selected_outputs = self.perceptual_loss_model.layers[self.vgg_out_layer].output
 
 
         # selected_layers = [22]
@@ -155,7 +157,7 @@ class EDSR_super:
 
     def train_l1(self, train_x, train_y, epochs, verbose=2):
         self.optimizer_l1 = tf.keras.optimizers.Adam(learning_rate=PiecewiseConstantDecay(boundaries=[200000], values=[1e-4, 5e-5]))
-        self.loss_fxn_l1 = tf.keras.losses.MeanSquaredError()
+        self.loss_fxn_l1 = tf.keras.losses.MeanuaredError()
         self.EDSR_model_l1.compile(optimizer=self.optimizer_l1, loss=self.loss_fxn_l1)
         history = self.EDSR_model_l1.fit(x=train_x, y=train_y, epochs=epochs, verbose=verbose)
         print('FINISHED TRAINING USING L1 LOSS')
@@ -173,7 +175,7 @@ class EDSR_super:
         self.EDSR_full_model.compile(optimizer=self.optimizer_full, loss='mse', metrics=['mse'])
         print('FINISHED COMPILING FULL MODEL \n STARTING TO TRAIN NOW')
 
-        filepath = "saved_models/TRIAL_"+str(run_trial_id)+"/RB_"+str(self.number_of_resblocks)+"-FEATS_"+str(self.number_of_features)+"-BSZ_"+str(batch_size)+"-EPOCH_{epoch:02d}-LOSS_{loss:.1f}.hdf5"
+        filepath = "saved_models/TRIAL"+str(run_trial_id)+"-RB_"+str(self.number_of_resblocks)+"-FEATS_"+str(self.number_of_features)+"-VGGOUT_"+str(self.vgg_out_layer)+"-BSZ_"+str(batch_size)+"-EPOCH_{epoch:02d}-LOSS_{loss:.1f}.hdf5"
         checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, mode='auto', save_freq=int(np.shape(train_x)[0]/batch_size))
 
         self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, batch_size=batch_size, epochs=epochs, verbose=verbose, callbacks=[checkpoint])
