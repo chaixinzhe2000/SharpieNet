@@ -173,7 +173,7 @@ class EDSR_super:
         self.EDSR_full_model.compile(optimizer=self.optimizer_full, loss='mse', metrics=['mse'])
         print('FINISHED COMPILING FULL MODEL \n STARTING TO TRAIN NOW')
 
-        filepath = "saved_models/"+str(run_trial_id)+"/RB"+str(self.number_of_resblocks)+"-FEATS_"+str(self.number_of_features)+"-BSZ_"+str(batch_size)+"-EPOCH_{epoch:02d}-LOSS_{loss:.1f}.hdf5"
+        filepath = "saved_models/TRIAL_"+str(run_trial_id)+"/RB_"+str(self.number_of_resblocks)+"-FEATS_"+str(self.number_of_features)+"-BSZ_"+str(batch_size)+"-EPOCH_{epoch:02d}-LOSS_{loss:.1f}.hdf5"
         checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, mode='auto', save_freq=int(np.shape(train_x)[0]/batch_size))
 
         self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, batch_size=batch_size, epochs=epochs, verbose=verbose, callbacks=[checkpoint])

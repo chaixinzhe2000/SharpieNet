@@ -36,7 +36,8 @@ def save_result(img, resolution, file_name, run_trial_id):
 
     # Make the line.
     # mark_inset(ax, axins, loc1=1, loc2=3, fc="none", ec="blue")
-    plt.savefig("results/"+str(run_trial_id)+file_name+"-"+resolution+".png")
+    plt.savefig("results/TRIAL_"+str(run_trial_id)+"/"+file_name+"-"+resolution+".png")
+    # plt.savefig("results/TRIAL"+str(run_trial_id)+"-IM"+file_name+"-"+resolution+".png")
 
 
 
