@@ -15,7 +15,7 @@ def main():
     batch_size = 25
     original_size = 300
     upscale_factor = 3
-    epochs_for_l1 = 1
+    epochs_for_l1 = 100
     epochs_for_perceptual = 200
     input_size = original_size // upscale_factor
     LR_size = input_size
@@ -39,8 +39,9 @@ def main():
     model.train_l1(train_data, epochs_for_l1, validation_data=validation_data, verbose=2)
     # model.save_weights(weights_file)
     '''
-    # train the model using perceptual loss
-    # TODO: implement perceptual loss
+    # TODO: train with l1 loss
+    model.train_l1(train_x=train_x, train_y=train_y, epochs=epochs_for_perceptual, batch_size=batch_size, run_trial_id=run_trial_id, verbose=2)
+    # TODO: train with perceptual loss
     model.train_perceptual(train_x=train_x, train_y=train_y, epochs=epochs_for_perceptual, batch_size=batch_size, run_trial_id=run_trial_id, verbose=2)
 
     # test the model and output results

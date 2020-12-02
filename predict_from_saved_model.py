@@ -7,22 +7,30 @@ import postprocess_rgb
 def main():
     LR_size = 100
     HR_size = 300
-    run_trial_id = 100
+    run_trial_id = 7384
+    epoch = 100
 
-    model = tf.keras.models.load_model('my_model.h5')
     dirname = os.path.dirname(__file__)
+    model = tf.keras.models.load_model("saved_models/TRIAL7384-RB_8-FEATS_64-VGGOUT_12-BSZ_25-EPOCH_100-LOSS_7930.4.hdf5")
+    model.summary()
     test_path = os.path.join(dirname, "BSDS500/data/test")
 
     LR_test_images, HR_test_images, global_rgb_mean, global_rgb_std = preprocess_rgb.get_normalized_x_and_y(test_path,
                                                                                                             HR_size,
                                                                                                             LR_size)
+    for i in range(5):
+        model.layers.pop()
+
+    new_model = tf.keras.Model(model.input, model.layers[-5].output)
+    new_model.summary()
     for i in range(len(LR_test_images)):
         # load and preprocess test image
         print(np.shape(LR_test_images[i]))
         input = np.expand_dims(LR_test_images[i], axis=0)
         print(np.shape(input))
-        predicted_image = model.predict_l1(input)
 
+        predicted_image = new_model.predict(input)
+        print(np.shape(predicted_image))
         # print(predicted_image)
         postprocess_rgb.save_result(predicted_image[0] * 255, "predicted", str(i), run_trial_id)
         postprocess_rgb.save_result(HR_test_images[i] * 255, "HR", str(i), run_trial_id)

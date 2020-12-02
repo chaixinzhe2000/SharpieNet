@@ -155,12 +155,17 @@ class EDSR_super:
         # lossModelOutputs = [lossModelOutputs[i] for i in range(len(selectedLayers))]
         '''
 
-    def train_l1(self, train_x, train_y, epochs, verbose=2):
+    def train_l1(self, train_x, train_y, epochs, batch_size, run_trial_id, verbose=2):
         self.optimizer_l1 = tf.keras.optimizers.Adam(learning_rate=PiecewiseConstantDecay(boundaries=[200000], values=[1e-4, 5e-5]))
         self.loss_fxn_l1 = tf.keras.losses.MeanSquaredError()
         self.EDSR_model_l1.compile(optimizer=self.optimizer_l1, loss=self.loss_fxn_l1)
         history = self.EDSR_model_l1.fit(x=train_x, y=train_y, epochs=epochs, verbose=verbose)
         print('FINISHED TRAINING USING L1 LOSS')
+        filepath = "saved_models/TRIAL" + str(run_trial_id) + "-RB_" + str(self.number_of_resblocks) + "-FEATS_" + str(
+            self.number_of_features) + "-VGGOUT_" + str(self.vgg_out_layer) + "-BSZ_" + str(
+            batch_size) + "FINAL_MODEL_ONLY_L1_TRAINING.hdf5"
+        self.EDSR_full_model.save(filepath=filepath)
+
 
     def train_perceptual(self, train_x, train_y, epochs, batch_size, run_trial_id, verbose=2):
         self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-3, 6e-5])
@@ -176,7 +181,7 @@ class EDSR_super:
         print('FINISHED COMPILING FULL MODEL \n STARTING TO TRAIN NOW')
 
         filepath = "saved_models/TRIAL"+str(run_trial_id)+"-RB_"+str(self.number_of_resblocks)+"-FEATS_"+str(self.number_of_features)+"-VGGOUT_"+str(self.vgg_out_layer)+"-BSZ_"+str(batch_size)+"-EPOCH_{epoch:02d}-LOSS_{loss:.1f}.hdf5"
-        checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, mode='auto', save_freq=int(np.shape(train_x)[0]/batch_size))
+        checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, mode='auto', save_freq=int(np.shape(train_x)[0]/batch_size)*5)
 
         self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, batch_size=batch_size, epochs=epochs, verbose=verbose, callbacks=[checkpoint])
 
