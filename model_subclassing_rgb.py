@@ -79,8 +79,8 @@ class EDSR_super:
         # self.number_of_resblocks = 32
         # self.number_of_features = 256
 
-        self.number_of_resblocks = 2
-        self.number_of_features = 2
+        self.number_of_resblocks = 8
+        self.number_of_features = 64
         self.vgg_out_layer = 12
 
         self.kernel_size = 3
