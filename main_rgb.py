@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 def main():
     # defining hyperparameters
-    batch_size = 10
+    batch_size = 20
     original_size = 300
     upscale_factor = 3
     epochs_for_l1 = 1
@@ -39,7 +39,7 @@ def main():
     '''
     # train the model using perceptual loss
     # TODO: implement perceptual loss
-    model.train_perceptual(train_x=train_x, train_y=train_y, epochs=epochs_for_perceptual, verbose=2)
+    model.train_perceptual(train_x=train_x, train_y=train_y, epochs=epochs_for_perceptual, batch_size=batch_size, verbose=2)
 
     # test the model and output results
     # set up the directory from where we get test images

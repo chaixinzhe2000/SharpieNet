@@ -12,6 +12,7 @@ import numpy as np
 # no res scaling factor
 from tensorflow.python.keras.callbacks import ModelCheckpoint
 from tensorflow.python.keras.optimizer_v2.learning_rate_schedule import PiecewiseConstantDecay
+import os
 
 
 class ResBlock(tf.keras.layers.Layer):
@@ -78,8 +79,8 @@ class EDSR_super:
         # self.number_of_resblocks = 32
         # self.number_of_features = 256
 
-        self.number_of_resblocks = 8
-        self.number_of_features = 64
+        self.number_of_resblocks = 2
+        self.number_of_features = 2
 
         self.kernel_size = 3
         self.res_scaling = 0.2
@@ -159,7 +160,7 @@ class EDSR_super:
         history = self.EDSR_model_l1.fit(x=train_x, y=train_y, epochs=epochs, verbose=verbose)
         print('FINISHED TRAINING USING L1 LOSS')
 
-    def train_perceptual(self, train_x, train_y, epochs, verbose=2):
+    def train_perceptual(self, train_x, train_y, epochs, batch_size, verbose=2):
         self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-3, 6e-5])
         self.optimizer_full = tf.keras.optimizers.Adam(learning_rate=self.learning_rate_perceptual)
 
@@ -167,14 +168,16 @@ class EDSR_super:
         train_y = tf.keras.applications.vgg16.preprocess_input(train_y)
         Y_train_feature_sets = self.perceptual_loss_model.predict(train_y)
 
-        filepath = "saved_models/saved-model-{epoch:02d}-{val_loss:.2f}.hdf5"
-        checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=False, mode='auto', save_freq=10)
 
         self.EDSR_full_model.summary()
-        self.EDSR_full_model.compile(optimizer=self.optimizer_full, loss='mse')
+        self.EDSR_full_model.compile(optimizer=self.optimizer_full, loss='mse', metrics=['mse'])
         print('FINISHED COMPILING FULL MODEL \n STARTING TO TRAIN NOW')
 
-        self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, epochs=epochs, verbose=verbose)
+        dirname = os.path.dirname(__file__)
+        filepath = os.path.join(dirname, "saved_models/saved-model-{epoch:02d}-{val_loss:.2f}.hdf5")
+        checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, mode='auto', save_freq=int(np.shape(train_x)[0]/batch_size))
+
+        self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, batch_size=batch_size, epochs=epochs, verbose=verbose, callbacks=[checkpoint])
 
         print('FINISHED TRAINING USING PERCEPTUAL LOSS')
 
