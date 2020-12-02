@@ -157,7 +157,7 @@ class EDSR_super:
 
     def train_l1(self, train_x, train_y, epochs, verbose=2):
         self.optimizer_l1 = tf.keras.optimizers.Adam(learning_rate=PiecewiseConstantDecay(boundaries=[200000], values=[1e-4, 5e-5]))
-        self.loss_fxn_l1 = tf.keras.losses.MeanuaredError()
+        self.loss_fxn_l1 = tf.keras.losses.MeanSquaredError()
         self.EDSR_model_l1.compile(optimizer=self.optimizer_l1, loss=self.loss_fxn_l1)
         history = self.EDSR_model_l1.fit(x=train_x, y=train_y, epochs=epochs, verbose=verbose)
         print('FINISHED TRAINING USING L1 LOSS')
