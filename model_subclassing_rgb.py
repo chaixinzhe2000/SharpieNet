@@ -174,7 +174,7 @@ class EDSR_super:
         print('FINISHED COMPILING FULL MODEL \n STARTING TO TRAIN NOW')
 
         dirname = os.path.dirname(__file__)
-        filepath = os.path.join(dirname, "saved_models/saved-model-{epoch:02d}-{val_loss:.2f}.hdf5")
+        filepath = "saved_models/saved-model-{epoch:02d}-{val_loss:.2f}.hdf5"
         checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, mode='auto', save_freq=int(np.shape(train_x)[0]/batch_size))
 
         self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, batch_size=batch_size, epochs=epochs, verbose=verbose, callbacks=[checkpoint])
