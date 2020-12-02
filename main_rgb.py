@@ -16,7 +16,7 @@ def main():
     original_size = 300
     upscale_factor = 3
     epochs_for_l1 = 1
-    epochs_for_perceptual = 2
+    epochs_for_perceptual = 200
     input_size = original_size // upscale_factor
     LR_size = input_size
     HR_size = original_size
