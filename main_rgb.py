@@ -20,7 +20,7 @@ def main():
     input_size = original_size // upscale_factor
     LR_size = input_size
     HR_size = original_size
-    run_trial_id = random.randint(0, 1000)
+    run_trial_id = random.randint(0, 10000)
 
     # joining relative path to form a full path
     dirname = os.path.dirname(__file__)
