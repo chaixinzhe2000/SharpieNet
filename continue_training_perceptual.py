@@ -47,7 +47,7 @@ def main():
     model.EDSR_full_model = tf.keras.models.load_model(old_model_file_path)
     # model.train_l1(train_x=train_x, train_y=train_y, epochs=epochs_for_l1, batch_size=batch_size, run_trial_id=run_trial_id, verbose=2)
     # TODO: train with perceptual loss
-    model.train_perceptual(train_x=train_x, train_y=train_y, epochs=epochs_for_perceptual, batch_size=batch_size, run_trial_id=str(run_trial_id+"_"+old_id), verbose=2)
+    model.train_perceptual(train_x=train_x, train_y=train_y, epochs=epochs_for_perceptual, batch_size=batch_size, run_trial_id=str(run_trial_id)+"_"+str(old_id), verbose=2)
 
     # test the model and output results
     # set up the directory from where we get test images
