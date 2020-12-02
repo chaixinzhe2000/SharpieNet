@@ -63,6 +63,7 @@ class Upsampler(tf.keras.layers.Layer):
         x = self.pixel_shuffle(x, self.model_scaling_factor)
         return x
 
+
 class vgg16_preprocessing_layer(tf.keras.layers.Layer):
     def __init__(self):
         super(vgg16_preprocessing_layer, self).__init__()
@@ -71,6 +72,7 @@ class vgg16_preprocessing_layer(tf.keras.layers.Layer):
     def call(self, input_tensor):
         input_tensor *= 255.0
         return tf.keras.applications.vgg16.preprocess_input(input_tensor)
+
 
 # EDSR super class
 class EDSR_super:
@@ -87,7 +89,6 @@ class EDSR_super:
         self.res_scaling = 0.2
         self.scaling_factor = 3
         self.final_output_channels = 3
-
 
         # from keras tutorial
         # self.upscale_factor = upscale_factor
@@ -107,7 +108,8 @@ class EDSR_super:
         for i in range(self.number_of_resblocks):
             x = ResBlock(self, self.kernel_size, self.number_of_features, "Orthogonal").call(model=self, input_tensor=x)
         # tail
-        x = Upsampler(model=self, number_of_features=self.number_of_features, initializer=tf.keras.initializers.GlorotUniform()).call(x)
+        x = Upsampler(model=self, number_of_features=self.number_of_features,
+                      initializer=tf.keras.initializers.GlorotUniform()).call(x)
         x = tf.keras.layers.Conv2D(self.final_output_channels, self.kernel_size, strides=(1, 1),
                                    padding="SAME", kernel_initializer="Orthogonal")(x)
         # add mean (mean shift)
@@ -118,7 +120,6 @@ class EDSR_super:
         self.EDSR_model_l1 = tf.keras.Model(inputs, x, name="MAIN_MODEL")
         self.EDSR_model_l1.summary()
 
-
         # TODO: MAYBE TRY CAFFE FOR PERCEPTUAL LOSS BECAUSE THAT IS APPARENTLY BETTER
         # set up ESDR model using vgg16 perceptual loss
         self.perceptual_loss_model = tf.keras.applications.vgg16.VGG16(include_top=False, weights="imagenet",
@@ -127,7 +128,6 @@ class EDSR_super:
         for layer in self.perceptual_loss_model.layers:
             layer.trainable = False
 
-
         # this is for multiple feature extracts.
         # selected_layers = [1, 4, 8, 9, 11, 17]
         # selected_outputs = [self.perceptual_loss_model.layers[i].output for i in selected_layers]
@@ -135,14 +135,14 @@ class EDSR_super:
         # this is for one feature extract layer
         selected_outputs = self.perceptual_loss_model.layers[self.vgg_out_layer].output
 
-
         # selected_layers = [22]
         # selected_outputs = [self.perceptual_loss_model.layers[i].output for i in selected_layers]
 
         # TODO: change line above into the for loop below
         # for layer_index in selected_layers:
         #     selected_outputs.append(self.perceptual_loss_model[layer_index].output)
-        self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs, name="VGG16_partial_for_loss")
+        self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs,
+                                                    name="VGG16_partial_for_loss")
         self.perceptual_loss_model.summary()
         # self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
 
@@ -156,7 +156,8 @@ class EDSR_super:
         '''
 
     def train_l1(self, train_x, train_y, epochs, batch_size, run_trial_id, verbose=2):
-        self.optimizer_l1 = tf.keras.optimizers.Adam(learning_rate=PiecewiseConstantDecay(boundaries=[200000], values=[1e-4, 5e-5]))
+        self.optimizer_l1 = tf.keras.optimizers.Adam(
+            learning_rate=PiecewiseConstantDecay(boundaries=[200000], values=[1e-4, 5e-5]))
         self.loss_fxn_l1 = tf.keras.losses.MeanSquaredError()
         self.EDSR_model_l1.compile(optimizer=self.optimizer_l1, loss=self.loss_fxn_l1)
         history = self.EDSR_model_l1.fit(x=train_x, y=train_y, epochs=epochs, verbose=verbose)
@@ -166,31 +167,33 @@ class EDSR_super:
             batch_size) + "FINAL_MODEL_ONLY_L1_TRAINING.hdf5"
         self.EDSR_full_model.save(filepath=filepath)
 
-
     def train_perceptual(self, train_x, train_y, epochs, batch_size, run_trial_id, verbose=2):
-        self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-3, 6e-5])
+        self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[3e-3, 2e-5])
         self.optimizer_full = tf.keras.optimizers.Adam(learning_rate=self.learning_rate_perceptual)
 
         train_y *= 255.0
         train_y = tf.keras.applications.vgg16.preprocess_input(train_y)
         Y_train_feature_sets = self.perceptual_loss_model.predict(train_y)
 
-
         self.EDSR_full_model.summary()
         self.EDSR_full_model.compile(optimizer=self.optimizer_full, loss='mse', metrics=['mse'])
         print('FINISHED COMPILING FULL MODEL \n STARTING TO TRAIN NOW')
 
-        filepath = "saved_models/TRIAL"+str(run_trial_id)+"-RB_"+str(self.number_of_resblocks)+"-FEATS_"+str(self.number_of_features)+"-VGGOUT_"+str(self.vgg_out_layer)+"-BSZ_"+str(batch_size)+"-EPOCH_{epoch:02d}-LOSS_{loss:.1f}.hdf5"
-        checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, mode='auto', save_freq=int(np.shape(train_x)[0]/batch_size)*5)
+        filepath = "saved_models/TRIAL" + str(run_trial_id) + "-RB_" + str(self.number_of_resblocks) + "-FEATS_" + str(
+            self.number_of_features) + "-VGGOUT_" + str(self.vgg_out_layer) + "-BSZ_" + str(
+            batch_size) + "-EPOCH_{epoch:02d}-LOSS_{loss:.1f}.hdf5"
+        checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, mode='auto',
+                                     save_freq=int(np.shape(train_x)[0] / batch_size) * 5)
 
-        self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, batch_size=batch_size, epochs=epochs, verbose=verbose, callbacks=[checkpoint])
+        self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, batch_size=batch_size, epochs=epochs,
+                                 verbose=verbose, callbacks=[checkpoint])
 
         print('FINISHED TRAINING USING PERCEPTUAL LOSS')
 
     def test_perceptual_loss(self, image_x_np_array, image_y_np_array):
         image_x = self.perceptual_loss_model.predict(image_x_np_array)
         image_y = self.perceptual_loss_model.predict(image_y_np_array)
-        print("MEAN SQUARED ERROR PERCEPTUAL LOSS: ", np.mean((image_y - image_x)**2))
+        print("MEAN SQUARED ERROR PERCEPTUAL LOSS: ", np.mean((image_y - image_x) ** 2))
 
     def predict_l1(self, test_image):
         return self.EDSR_model_l1.predict(test_image)
