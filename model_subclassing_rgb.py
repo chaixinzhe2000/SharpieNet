@@ -10,6 +10,7 @@ import numpy as np
 # no batch norm
 # no activation functions after each conv layer
 # no res scaling factor
+from tensorflow.python.keras.callbacks import ModelCheckpoint
 from tensorflow.python.keras.optimizer_v2.learning_rate_schedule import PiecewiseConstantDecay
 
 
@@ -129,7 +130,7 @@ class EDSR_super:
         # selected_outputs = [self.perceptual_loss_model.layers[i].output for i in selected_layers]
 
         # this is for one feature extract layer
-        selected_outputs = self.perceptual_loss_model.layers[12].output
+        selected_outputs = self.perceptual_loss_model.layers[5].output
 
 
         # selected_layers = [22]
@@ -159,12 +160,16 @@ class EDSR_super:
         print('FINISHED TRAINING USING L1 LOSS')
 
     def train_perceptual(self, train_x, train_y, epochs, verbose=2):
-        self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-3, 1e-5])
+        self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-3, 6e-5])
         self.optimizer_full = tf.keras.optimizers.Adam(learning_rate=self.learning_rate_perceptual)
 
         train_y *= 255.0
         train_y = tf.keras.applications.vgg16.preprocess_input(train_y)
         Y_train_feature_sets = self.perceptual_loss_model.predict(train_y)
+
+        filepath = "saved_models/saved-model-{epoch:02d}-{val_loss:.2f}.hdf5"
+        checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=False, mode='auto', save_freq=10)
+
         self.EDSR_full_model.summary()
         self.EDSR_full_model.compile(optimizer=self.optimizer_full, loss='mse')
         print('FINISHED COMPILING FULL MODEL \n STARTING TO TRAIN NOW')

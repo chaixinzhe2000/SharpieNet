@@ -83,12 +83,12 @@ def main():
         # postprocess_rgb.save_result(denormalized_HR, "HR", str(i))
         # postprocess_rgb.save_result(denormalized_LR, "LR", str(i))
 
-        vgg_mean_rgb = np.array([123.68, 116.78, 103.94])
-
-        postprocess_rgb.save_result(predicted_image[0]*255.0+vgg_mean_rgb, "predicted with VGGMEAN", str(i))
-        postprocess_rgb.save_result(HR_test_images[i]*255.0, "HR", str(i))
-        postprocess_rgb.save_result(LR_test_images[i]*255.0, "LR", str(i))
-        # plt.close('all')
+        # vgg_mean_rgb = np.array([123.68, 116.78, 103.94])
+        #
+        # postprocess_rgb.save_result(predicted_image[0]*255.0+vgg_mean_rgb, "predicted with VGGMEAN", str(i))
+        # postprocess_rgb.save_result(HR_test_images[i]*255.0, "HR", str(i))
+        # postprocess_rgb.save_result(LR_test_images[i]*255.0, "LR", str(i))
+        # # plt.close('all')
 
 
 
