@@ -177,7 +177,7 @@ class EDSR_super:
         filepath = "saved_models/model.saved-model-{epoch:02d}-{val_loss:.2f}.hdf5"
         checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, mode='auto', save_freq=int(np.shape(train_x)[0]/batch_size))
 
-        self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, batch_size=batch_size, epochs=epochs, verbose=verbose, callbacks=[checkpoint])
+        self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, batch_size=batch_size, validation_split=0.1, epochs=epochs, verbose=verbose, callbacks=[checkpoint])
 
         print('FINISHED TRAINING USING PERCEPTUAL LOSS')
 
