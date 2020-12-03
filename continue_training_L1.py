@@ -44,7 +44,12 @@ def main():
     '''
 
     # TODO: load old model
-    model.EDSR_full_model = tf.keras.models.load_model(old_model_file_path)
+    new_full_model = tf.keras.models.load_model(old_model_file_path)
+    new_L1_model = new_full_model
+    for i in range(5):
+        new_L1_model.layers.pop()
+    model.EDSR_model_l1 = tf.keras.Model(new_L1_model.input, new_L1_model.layers[-5].output)
+    model.EDSR_full_model = new_full_model
     # model.train_l1(train_x=train_x, train_y=train_y, epochs=epochs_for_l1, batch_size=batch_size, run_trial_id=run_trial_id, verbose=2)
     # TODO: train with L1 loss
     model.train_perceptual(train_x=train_x, train_y=train_y, epochs=epochs_for_l1, batch_size=batch_size, run_trial_id=str(run_trial_id)+"_"+str(old_id), verbose=2)
