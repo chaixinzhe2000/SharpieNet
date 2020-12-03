@@ -55,7 +55,7 @@ def main():
     # make a list of test image paths
     list_of_test_img_paths = []
     for file_name in os.listdir(test_path):
-        if file_name.endswith(".jpg"):
+        if file_name.endswith(".jpg") or file_name.endswith(".png"):
             list_of_test_img_paths.append(file_name)
 
     LR_test_images, HR_test_images, global_rgb_mean, global_rgb_std = preprocess_rgb.get_normalized_x_and_y(test_path, HR_size, LR_size)
