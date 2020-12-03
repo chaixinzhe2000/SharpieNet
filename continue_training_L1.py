@@ -18,7 +18,7 @@ def main():
     batch_size = 25
     original_size = 300
     upscale_factor = 3
-    epochs_for_l1 = 20
+    epochs_for_l1 = 3
     epochs_for_perceptual = 200
     input_size = original_size // upscale_factor
     LR_size = input_size
