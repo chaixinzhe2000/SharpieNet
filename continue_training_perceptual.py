@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 
 def main():
     # defining hyperparameters
-    old_id = 5727
-    old_model_file_path = "saved_models/TRIAL5727-RB_8-FEATS_64-VGGOUT_12-BSZ_25FINAL_MODEL_ONLY_L1_TRAINING.hdf5"
+    old_id = 7384
+    old_model_file_path = "saved_models/TRIAL7384-RB_8-FEATS_64-VGGOUT_12-BSZ_25-EPOCH_131-LOSS_7499.6.hdf5"
 
     batch_size = 25
     original_size = 300
