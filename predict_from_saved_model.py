@@ -11,9 +11,9 @@ def main():
     epoch = 100
 
     dirname = os.path.dirname(__file__)
-    model = tf.keras.models.load_model("saved_models/TRIAL657_5727(try 2)-RB_8-FEATS_64-VGGOUT_12-BSZ_25-EPOCH_05-LOSS_13402.0.hdf5")
+    model = tf.keras.models.load_model("saved_models/TRIAL9918_99817384-RB_8-FEATS_64-VGGOUT_12-BSZ_25-EPOCH_05-LOSS_6809.9.hdf5")
     model.summary()
-    test_path = os.path.join(dirname, "BSDS500/data/test")
+    test_path = os.path.join(dirname, "div2k_and_BSDS500_dataset/test")
 
     LR_test_images, HR_test_images, global_rgb_mean, global_rgb_std = preprocess_rgb.get_normalized_x_and_y(test_path,
                                                                                                             HR_size,
