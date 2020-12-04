@@ -160,7 +160,7 @@ class EDSR_super:
             learning_rate=PiecewiseConstantDecay(boundaries=[200000], values=[5e-4, 5e-5]))
         self.loss_fxn_l1 = tf.keras.losses.MeanSquaredError()
         self.EDSR_model_l1.compile(optimizer=self.optimizer_l1, loss=self.loss_fxn_l1)
-        history = self.EDSR_model_l1.fit(x=train_x, y=train_y, epochs=epochs, verbose=verbose)
+        history = self.EDSR_model_l1.fit(x=train_x, y=train_y, epochs=epochs, verbose=verbose, shuffle=True)
         print('FINISHED TRAINING USING L1 LOSS')
         filepath = "saved_models/TRIAL" + str(run_trial_id) + "-RB_" + str(self.number_of_resblocks) + "-FEATS_" + str(
             self.number_of_features) + "-VGGOUT_" + str(self.vgg_out_layer) + "-BSZ_" + str(
@@ -168,7 +168,7 @@ class EDSR_super:
         self.EDSR_full_model.save(filepath=filepath)
 
     def train_perceptual(self, train_x, train_y, epochs, batch_size, run_trial_id, verbose=2):
-        self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-4, 2e-5])
+        self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[5e-4, 5e-5])
         self.optimizer_full = tf.keras.optimizers.Adam(learning_rate=self.learning_rate_perceptual)
 
         train_y *= 255.0
