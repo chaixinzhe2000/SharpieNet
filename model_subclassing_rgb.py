@@ -168,7 +168,7 @@ class EDSR_super:
         self.EDSR_full_model.save(filepath=filepath)
 
     def train_perceptual(self, train_x, train_y, epochs, batch_size, run_trial_id, verbose=2):
-        self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[1e-4, 2e-5])
+        self.learning_rate_perceptual = PiecewiseConstantDecay(boundaries=[100000], values=[5e-4, 5e-5])
         self.optimizer_full = tf.keras.optimizers.Adam(learning_rate=self.learning_rate_perceptual)
 
         train_y *= 255.0
