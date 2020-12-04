@@ -186,7 +186,7 @@ class EDSR_super:
                                      save_freq=int(np.shape(train_x)[0] / batch_size) * 5)
 
         self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, batch_size=batch_size, epochs=epochs,
-                                 verbose=verbose, callbacks=[checkpoint])
+                                 verbose=verbose, callbacks=[checkpoint], shuffle=True)
 
         print('FINISHED TRAINING USING PERCEPTUAL LOSS')
 
