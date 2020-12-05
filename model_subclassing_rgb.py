@@ -183,7 +183,7 @@ class EDSR_super:
             self.number_of_features) + "-VGGOUT_" + str(self.vgg_out_layer) + "-BSZ_" + str(
             batch_size) + "-EPOCH_{epoch:02d}-LOSS_{loss:.1f}.hdf5"
         checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, mode='auto',
-                                     save_freq=int(np.shape(train_x)[0] / batch_size) * 5)
+                                     save_freq=int(np.shape(train_x)[0] / batch_size) * 10)
 
         self.EDSR_full_model.fit(x=train_x, y=Y_train_feature_sets, batch_size=batch_size, epochs=epochs,
                                  verbose=verbose, callbacks=[checkpoint], shuffle=True)
