@@ -7,11 +7,11 @@ import postprocess_rgb
 def main():
     LR_size = 100
     HR_size = 300
-    run_trial_id = 1947_56689177991899817384
+    run_trial_id = 6704
     epoch = 100
 
     dirname = os.path.dirname(__file__)
-    model = tf.keras.models.load_model("saved_models/TRIAL1947_56689177991899817384-RB_8-FEATS_64-VGGOUT_12-BSZ_25-EPOCH_200-LOSS_4582.8.hdf5")
+    model = tf.keras.models.load_model("saved_models/TRIAL6704-RB_10-FEATS_128-VGGOUT_12-BSZ_25-EPOCH_45-LOSS_8714.2.hdf5")
     model.summary()
     test_path = os.path.join(dirname, "div2k_and_BSDS500_dataset/test")
 
