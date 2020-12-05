@@ -51,7 +51,7 @@ def main():
 
     # test the model and output results
     # set up the directory from where we get test images
-    test_path = os.path.join(dirname, "flickr_div2k_bsds500_ds/train")
+    test_path = os.path.join(dirname, "flickr_div2k_bsds500_ds/test")
     # make a list of test image paths
     list_of_test_img_paths = []
     for file_name in os.listdir(test_path):
