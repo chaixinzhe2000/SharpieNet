@@ -11,7 +11,7 @@ def main():
     epoch = 100
 
     dirname = os.path.dirname(__file__)
-    model = tf.keras.models.load_model("saved_models/TRIAL6704-RB_10-FEATS_128-VGGOUT_12-BSZ_25-EPOCH_45-LOSS_8714.2.hdf5")
+    model = tf.keras.models.load_model("saved_models/TRIAL8692_194756689177991899817384-RB_10-FEATS_128-VGGOUT_12-BSZ_25-EPOCH_60-LOSS_4325.4.hdf5")
     model.summary()
     test_path = os.path.join(dirname, "div2k_and_BSDS500_dataset/test")
 
