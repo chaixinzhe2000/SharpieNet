@@ -27,7 +27,7 @@ def main():
 
     # joining relative path to form a full path
     dirname = os.path.dirname(__file__)
-    training_full_path = os.path.join(dirname, "BSDS500/data/images/train")
+    training_full_path = os.path.join(dirname, "flickr_div2k_bsds500_ds/train")
 
     train_x, train_y, global_rgb_mean, global_rgb_std = preprocess_rgb.get_normalized_x_and_y(training_full_path, HR_size, LR_size)
     # train_x, train_y = preprocess_rgb.further_normalization(train_x, train_y, global_rgb_mean, global_rgb_std)
@@ -51,7 +51,7 @@ def main():
 
     # test the model and output results
     # set up the directory from where we get test images
-    test_path = os.path.join(dirname, "BSDS500/data/test")
+    test_path = os.path.join(dirname, "flickr_div2k_bsds500_ds/train")
     # make a list of test image paths
     list_of_test_img_paths = []
     for file_name in os.listdir(test_path):
