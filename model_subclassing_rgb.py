@@ -77,34 +77,24 @@ class vgg16_preprocessing_layer(tf.keras.layers.Layer):
 # EDSR super class
 class EDSR_super:
     def __init__(self, image_size):
-        # from EDSR (torch)
-        # self.number_of_resblocks = 32
-        # self.number_of_features = 256
-
-        self.number_of_resblocks = 10
-        self.number_of_features = 128
-        self.vgg_out_layer = 12
+        self.number_of_resblocks = 2
+        self.number_of_features = 2
+        self.vgg_out_layer = 2
 
         self.kernel_size = 3
         self.res_scaling = 0.2
         self.scaling_factor = 3
         self.final_output_channels = 3
 
-        # from keras tutorial
-        # self.upscale_factor = upscale_factor
-        # self.channels = channels
         self.input_shape = (100, 100, 3)
 
         # model
         inputs = tf.keras.Input(shape=self.input_shape)
-        # subtract mean (mean shift)
-        # TODO: not implemented meanshift yet
         # head
         x = tf.keras.layers.Conv2D(self.number_of_features, self.kernel_size, strides=(1, 1),
                                    padding="SAME",
                                    kernel_initializer="Orthogonal", input_shape=self.input_shape)(inputs)
         # body
-        # TODO: Not sure if we can for loop like this
         for i in range(self.number_of_resblocks):
             x = ResBlock(self, self.kernel_size, self.number_of_features, "Orthogonal").call(model=self, input_tensor=x)
         # tail
@@ -112,15 +102,10 @@ class EDSR_super:
                       initializer=tf.keras.initializers.GlorotUniform()).call(x)
         x = tf.keras.layers.Conv2D(self.final_output_channels, self.kernel_size, strides=(1, 1),
                                    padding="SAME", kernel_initializer="Orthogonal")(x)
-        # add mean (mean shift)
-        # TODO: not implemented meanshift yet
-        # normalize outputs
-        # x = tf.keras.activations.sigmoid(x)
-        # initialize model
+
         self.EDSR_model_l1 = tf.keras.Model(inputs, x, name="MAIN_MODEL")
         self.EDSR_model_l1.summary()
 
-        # TODO: MAYBE TRY CAFFE FOR PERCEPTUAL LOSS BECAUSE THAT IS APPARENTLY BETTER
         # set up ESDR model using vgg16 perceptual loss
         self.perceptual_loss_model = tf.keras.applications.vgg16.VGG16(include_top=False, weights="imagenet",
                                                                        input_shape=(300, 300, 3))
@@ -128,23 +113,11 @@ class EDSR_super:
         for layer in self.perceptual_loss_model.layers:
             layer.trainable = False
 
-        # this is for multiple feature extracts.
-        # selected_layers = [1, 4, 8, 9, 11, 17]
-        # selected_outputs = [self.perceptual_loss_model.layers[i].output for i in selected_layers]
-
-        # this is for one feature extract layer
         selected_outputs = self.perceptual_loss_model.layers[self.vgg_out_layer].output
 
-        # selected_layers = [22]
-        # selected_outputs = [self.perceptual_loss_model.layers[i].output for i in selected_layers]
-
-        # TODO: change line above into the for loop below
-        # for layer_index in selected_layers:
-        #     selected_outputs.append(self.perceptual_loss_model[layer_index].output)
         self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs,
                                                     name="VGG16_partial_for_loss")
         self.perceptual_loss_model.summary()
-        # self.perceptual_loss_model = tf.keras.Model(self.perceptual_loss_model.input, selected_outputs)
 
         loss_model_outputs = self.perceptual_loss_model(vgg16_preprocessing_layer().call(self.EDSR_model_l1.output))
         # initialize fully connected model
